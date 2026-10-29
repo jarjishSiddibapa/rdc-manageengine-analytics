@@ -1,0 +1,9 @@
+# Not application source: build output, dependencies, runtime data and tool metadata.
+node_modules/
+frontend/dist/
+backend/db-backup/
+.claude/
+.codex/
+.agents/
+graphify-out/
+*.log

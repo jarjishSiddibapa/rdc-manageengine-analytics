@@ -1,0 +1,442 @@
+{
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\package.json": {
+    "mtime": 1793160742.320566,
+    "ast_hash": "ef973e770da0d97bcd7fb90576c063b0",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\server.js": {
+    "mtime": 1793164626.3466806,
+    "ast_hash": "4e26f59a595f0014caa15592bed9dbee",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\db\\database.js": {
+    "mtime": 1793164568.0086753,
+    "ast_hash": "1c8e2a458d57e0dfde3e7c4f007b2463",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\db\\pool.js": {
+    "mtime": 1793110547.4800546,
+    "ast_hash": "be0db109f1ddc2d4538ad6ff7127b660",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\routes\\admin.js": {
+    "mtime": 1793162327.4985714,
+    "ast_hash": "7b02882ae0d340cc4c4f7dc275bf96f3",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\routes\\auth.js": {
+    "mtime": 1793164619.6666677,
+    "ast_hash": "a6a588412e37bde0d82740ddfb9a851f",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\routes\\backups.js": {
+    "mtime": 1793162331.6925077,
+    "ast_hash": "d5eca234c9b20483d558da421afc4c3c",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\routes\\data.js": {
+    "mtime": 1793166166.5743854,
+    "ast_hash": "cb91a93aba2e729f48cd0ddfabadd3d7",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\scripts\\sync.js": {
+    "mtime": 1793111644.2852747,
+    "ast_hash": "cd56bc49bb0b8a44a94421fae776354e",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\services\\analytics.js": {
+    "mtime": 1793166156.3876705,
+    "ast_hash": "fcc208a660fe5ec9e251a2a5ae175c59",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\services\\audit.js": {
+    "mtime": 1793110180.0031,
+    "ast_hash": "4d292259802c91dd43c158cac56d0fdf",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\services\\auth.js": {
+    "mtime": 1793164577.3758965,
+    "ast_hash": "eb880fd5391d40d45acd50d3f51f1579",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\services\\backup.js": {
+    "mtime": 1793164568.0702724,
+    "ast_hash": "ea9cc21e3c869472248c5a05e179e70b",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\services\\history.js": {
+    "mtime": 1793162098.2419841,
+    "ast_hash": "84b04be680bdf65b630eae5168c5b640",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\services\\mailer.js": {
+    "mtime": 1793164577.3270867,
+    "ast_hash": "2afcc53c76f5216fe3bd48552ce93d24",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\services\\manageengine.js": {
+    "mtime": 1793162096.6876266,
+    "ast_hash": "fd0ed2f175b00d3b7fa852f3b1da9ac1",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\services\\reports.js": {
+    "mtime": 1793166359.7334456,
+    "ast_hash": "1fa46ed864c64c982cfa79f89ef51d09",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\services\\settings.js": {
+    "mtime": 1793166166.4835088,
+    "ast_hash": "843c78187fe85144f6046ae3b4da9cea",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\services\\sync.js": {
+    "mtime": 1793162788.1005423,
+    "ast_hash": "693bbb0543f90f99365f8e690acfe556",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\package.json": {
+    "mtime": 1793078687.84442,
+    "ast_hash": "df5d4ae4e68de8f65a1bf88dd73f5cd7",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\vite.config.js": {
+    "mtime": 1793110496.7279844,
+    "ast_hash": "16479389f3b3694831d4bf3506e8dd8b",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\App.jsx": {
+    "mtime": 1793164699.5850542,
+    "ast_hash": "9121a75a01846f904b6eb273b567c604",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\main.jsx": {
+    "mtime": 1793110636.4360833,
+    "ast_hash": "b757e1dfdd75c74f53004327856a1ea0",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\theme.js": {
+    "mtime": 1793110607.462562,
+    "ast_hash": "c094f34b44c80d4fa8b23c73fac23f73",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\charts.jsx": {
+    "mtime": 1793167395.0505202,
+    "ast_hash": "6b54c64a500703af5522708d5e1e4325",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\DrillDrawer.jsx": {
+    "mtime": 1793111111.1454206,
+    "ast_hash": "f5011b74cd77477cbd53df061a87fe8d",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\FilterBar.jsx": {
+    "mtime": 1793166337.8167095,
+    "ast_hash": "414dbca731da6c14c41c586623df929d",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\HandlingSection.jsx": {
+    "mtime": 1793166285.2876692,
+    "ast_hash": "09fdad502af48f5873b718e3b43f9ae9",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\Kpi.jsx": {
+    "mtime": 1793110681.0329254,
+    "ast_hash": "328ba1e64be66f2e0ea9f2f4878bcd90",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\RecordsTable.jsx": {
+    "mtime": 1793163030.1453593,
+    "ast_hash": "7901e21a1fded629d6dd97daafa28db3",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\sections.jsx": {
+    "mtime": 1793166274.680946,
+    "ast_hash": "e447f0354afff03f9959e3d95ef8a1f2",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\SyncButtons.jsx": {
+    "mtime": 1793167627.7848277,
+    "ast_hash": "6176c338566e823d6fc9171f24d3dc02",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\analytics\\fmt.js": {
+    "mtime": 1793111717.7704847,
+    "ast_hash": "7c861b7e498de2216bb4f0e6262c69e3",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\analytics\\hooks.js": {
+    "mtime": 1793111988.652217,
+    "ast_hash": "8c82a8aa59b271a96bfd11073e3dcb06",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\analytics\\http.js": {
+    "mtime": 1793110498.0304756,
+    "ast_hash": "aa21c6350c0855285f2c02d45bc84480",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\analytics\\TableTools.jsx": {
+    "mtime": 1793110778.1657088,
+    "ast_hash": "8518f7f13737ccbaeae19cf2f7111134",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\analytics\\TechnicianStory.jsx": {
+    "mtime": 1793166320.7259102,
+    "ast_hash": "93849995afb2c07b0fe860569d5b0661",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\analytics\\zoom.jsx": {
+    "mtime": 1793111539.689926,
+    "ast_hash": "ce3c6ff920fe4b0bd3747e5a0cd6b0a4",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\ui\\BrandMark.jsx": {
+    "mtime": 1793110493.1294804,
+    "ast_hash": "bd67b3e7f89b6178be36128a2785c865",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\ui\\ErrorState.jsx": {
+    "mtime": 1793110493.2621994,
+    "ast_hash": "e69aa03cb292bf406aea0082ce42329a",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\ui\\LoadingNotice.jsx": {
+    "mtime": 1793110493.2014098,
+    "ast_hash": "1819cfd95c4ae7471a4a3e5e50b1bf14",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\ui\\OfflineBanner.jsx": {
+    "mtime": 1793110493.3230045,
+    "ast_hash": "9ba558aa994d0070025ab0381ea2c8d3",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\ui\\TableSearch.jsx": {
+    "mtime": 1793110897.4903193,
+    "ast_hash": "ce8847ae116a7a7e9d85caa059a90feb",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\context\\Auth.jsx": {
+    "mtime": 1793110416.1390662,
+    "ast_hash": "1382e31e57385aa40c2f123d74c9a421",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\context\\Filters.jsx": {
+    "mtime": 1793166178.1998158,
+    "ast_hash": "0c91c10e80803402ae8b6a7c07e88ca1",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\context\\SRViewer.jsx": {
+    "mtime": 1793111110.4010165,
+    "ast_hash": "29610d5e2b435699efaf819d8c49f438",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\context\\Sync.jsx": {
+    "mtime": 1793111719.5480177,
+    "ast_hash": "24d0025e63b12a55360bbfe5df83ec7c",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\hooks\\useDebounced.js": {
+    "mtime": 1793110493.0845506,
+    "ast_hash": "ba5489ad632471a45d59f2c44dd09d74",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\hooks\\useLoad.js": {
+    "mtime": 1793110362.2036753,
+    "ast_hash": "c0fde62811d2a800ad79a8674f0e9a02",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\hooks\\useMedia.js": {
+    "mtime": 1793110493.0305643,
+    "ast_hash": "378e9778c786aafac4aefda63cfc6a68",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\layout\\AppShell.jsx": {
+    "mtime": 1793167627.7853491,
+    "ast_hash": "0555751a080e8918118077f4c44ccd84",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\pages\\Account.jsx": {
+    "mtime": 1793163244.4982152,
+    "ast_hash": "0bcedc3ec3a2b3d7ea005341e19cfe3a",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\pages\\Admin.jsx": {
+    "mtime": 1793164699.6698182,
+    "ast_hash": "1c23f1decda91e71f92464d31f0e9fdd",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\pages\\AdminBackups.jsx": {
+    "mtime": 1793164260.592898,
+    "ast_hash": "ee292d36d12fb164564707d8d55b670f",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\pages\\Dashboard.jsx": {
+    "mtime": 1793166670.133437,
+    "ast_hash": "f4f568625d265990a3ac2fd515393bec",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\pages\\DataSync.jsx": {
+    "mtime": 1793163256.3916922,
+    "ast_hash": "f49b072d7c9c0b985a84e11ee2c0852f",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\pages\\Login.jsx": {
+    "mtime": 1793164668.0482996,
+    "ast_hash": "1c16b0b89098345556940dd85b161f8f",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\pages\\SRs.jsx": {
+    "mtime": 1793163030.1453593,
+    "ast_hash": "2950ed4159bb2401f0394726451be6e9",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\pages\\TechnicianProfile.jsx": {
+    "mtime": 1793166343.5431266,
+    "ast_hash": "fb14a1d697d3e644dc2b3d928af129a9",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\pages\\Technicians.jsx": {
+    "mtime": 1793166337.8167095,
+    "ast_hash": "2e0d6a4b5537daba1059f69111b99e5e",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\services\\api.js": {
+    "mtime": 1793164699.3041604,
+    "ast_hash": "9558daa1c180529f15592602e4f8bf12",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\utils\\duration.js": {
+    "mtime": 1793022677.019808,
+    "ast_hash": "48778e79c4d2135522dbfb436f2cc323",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\utils\\errors.js": {
+    "mtime": 1793111710.8675768,
+    "ast_hash": "03548767a772efa8660221f808410190",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\utils\\exporters.js": {
+    "mtime": 1793163030.1774309,
+    "ast_hash": "2953cc6ecc5b9439b0da245c8a8d9ab3",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\utils\\format.js": {
+    "mtime": 1793078892.1657784,
+    "ast_hash": "c61955e7cf04b2b763a84a0468eb89fb",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\utils\\pagination.js": {
+    "mtime": 1793019006.3352404,
+    "ast_hash": "d659b1d219873a464b3f1a2bc848c1df",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\utils\\tableTools.js": {
+    "mtime": 1793019006.3352404,
+    "ast_hash": "f0fb472f94d40e6af40a3d7533142512",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\README.md": {
+    "mtime": 1793166854.8171396,
+    "ast_hash": "bcba69c447f3b1e81edb0691669879f0",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\index.html": {
+    "mtime": 1793110636.4317546,
+    "ast_hash": "0e26abf09e37d9f70be0570956398e1b",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\routes\\connections.js": {
+    "mtime": 1793162314.0785382,
+    "ast_hash": "f5c654492951d1d89989dc759e89dee9",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\services\\connections.js": {
+    "mtime": 1793162375.1533806,
+    "ast_hash": "130c2c89a35105b3a025ebfd364db9d3",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\context\\AppConfig.jsx": {
+    "mtime": 1793163244.5032153,
+    "ast_hash": "6deaa5a53ca9771516e2d5b9299ad547",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\hooks\\useUnsavedGuard.js": {
+    "mtime": 1793163124.24499,
+    "ast_hash": "af2ad531c092f7d5e7fb936c46c502ae",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\pages\\AdminConnections.jsx": {
+    "mtime": 1793163190.6176088,
+    "ast_hash": "948574510db0d2d573cea03bf7df2603",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\pages\\AdminSettings.jsx": {
+    "mtime": 1793163373.660731,
+    "ast_hash": "c10353734654c8f0c5676dda63165a7e",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\utils\\ui.js": {
+    "mtime": 1793166038.677773,
+    "ast_hash": "da5eaf45ed1c95b0377e4a9b1f0844ea",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\AGENTS.md": {
+    "mtime": 1793166854.8219852,
+    "ast_hash": "d1fc8e0cb225ed811a12763d34e7ebb9",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\CLAUDE.md": {
+    "mtime": 1793161380.7602475,
+    "ast_hash": "58882ef16989a38780b56c5e6ee13008",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\docs\\ARCHITECTURE.md": {
+    "mtime": 1793165261.388609,
+    "ast_hash": "2b71e2834a4e3411dea03f9640bac040",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\docs\\CHANGELOG.md": {
+    "mtime": 1793178984.3011925,
+    "ast_hash": "ed55c22e5fbc9dd66f556816994d2c82",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\docs\\CONFIGURATION.md": {
+    "mtime": 1793166842.951762,
+    "ast_hash": "ef62eb49251a498c947eb9ed84ddcf5d",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\docs\\OPERATIONS.md": {
+    "mtime": 1793165261.3068683,
+    "ast_hash": "7712be003956b9f24a606b8ef77b87d2",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\docs\\PROGRESS.md": {
+    "mtime": 1793166854.8171396,
+    "ast_hash": "d288dcbe44658616ad60c9d593fe56b0",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\backend\\services\\passwordReset.js": {
+    "mtime": 1793165121.5148792,
+    "ast_hash": "445f999656f92bfd30172fd9156095ee",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\ui\\AuthFrame.jsx": {
+    "mtime": 1793164667.877186,
+    "ast_hash": "cf9932f3877119b791dd3898dbf99a7f",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\pages\\PasswordReset.jsx": {
+    "mtime": 1793165157.7335184,
+    "ast_hash": "f9235526493b2ae13523f3d30f50ecba",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\components\\AggSwitch.jsx": {
+    "mtime": 1793166336.6756878,
+    "ast_hash": "493c16edb9e67a0d60006acb125ef5ed",
+    "semantic_hash": ""
+  },
+  "E:\\jarjish-projects\\deloitte-sr-analytics\\frontend\\src\\utils\\agg.js": {
+    "mtime": 1793166190.4497964,
+    "ast_hash": "869efc89ba33f3de6eba58c2f1e17632",
+    "semantic_hash": ""
+  }
+}

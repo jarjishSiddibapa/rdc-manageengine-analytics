@@ -1,0 +1,37 @@
+/* Admin > Settings and Admin > Connections */
+.set-groups { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.set-groups .ant-btn { display: inline-flex; align-items: center; gap: 8px; }
+.set-count { background: #f59e0b; color: #1b1300; border-radius: 999px; min-width: 20px; height: 20px; padding: 0 6px; font-size: 12px; font-weight: 700; display: inline-grid; place-items: center; }
+.set-section { margin-bottom: 16px; }
+.set-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+.set-section-head h3 { margin: 0; font-size: 15px; }
+.set-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 300px); gap: 8px 28px; padding: 14px 0 14px 12px; border-top: 1px solid var(--border, #e4e6f3); border-left: 3px solid transparent; align-items: start; }
+.set-row:first-of-type { border-top: 0; }
+.set-row.dirty { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.06); }
+.set-row.has-error { border-left-color: #d03b3b; background: rgba(208, 59, 59, 0.05); }
+.set-text label { font-weight: 600; display: block; }
+.set-help { color: var(--text-2, #5b6080); font-size: 13px; line-height: 1.45; margin-top: 2px; }
+.set-default { color: var(--text-3, #6b7090); font-size: 12.5px; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.set-default button, .set-link { background: none; border: 0; padding: 0; color: var(--brand, #4f46e5); cursor: pointer; font: inherit; text-decoration: underline; }
+.set-default button:disabled { color: var(--text-3, #6b7090); cursor: default; text-decoration: none; }
+.set-error { color: #b42318; font-size: 13px; margin-top: 4px; font-weight: 500; }
+.set-control { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-height: 36px; }
+.set-control .ant-input-number, .set-control .ant-select, .set-control .ant-input, .set-control .ant-picker { width: 100%; max-width: 300px; }
+.set-control .set-unit { color: var(--text-3, #6b7090); font-size: 13px; }
+.set-savebar { position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; margin: 0 -16px -16px; background: var(--surface, #fff); border-top: 1px solid var(--border, #e4e6f3); box-shadow: 0 -6px 14px rgba(15, 19, 48, 0.06); border-radius: 0 0 12px 12px; }
+.set-savebar .grow { flex: 1; min-width: 0; }
+.set-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #eef0fb; color: #3a3f78; }
+.set-pill.ok { background: #e3f6e8; color: #14612c; }
+.set-pill.warn { background: #fff1d6; color: #7a4b00; }
+.set-pill.off { background: #eceef5; color: #5b6080; }
+.conn-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); max-width: 860px; }
+.conn-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; align-items: center; }
+.conn-result { margin-top: 12px; }
+@media (max-width: 720px) {
+  .set-row { grid-template-columns: minmax(0, 1fr); padding-left: 10px; }
+  .set-control .ant-input-number, .set-control .ant-select, .set-control .ant-input, .set-control .ant-picker { max-width: none; }
+  /* sit above the bottom navigation bar of the phone layout */
+  .set-savebar { bottom: calc(var(--bottom-nav, 62px) + env(safe-area-inset-bottom)); margin: 0 -12px; padding: 10px 12px; gap: 8px; }
+  .set-savebar .grow { flex: 1 1 100%; }
+  .set-savebar .ant-btn { flex: 1 1 0; }
+}
