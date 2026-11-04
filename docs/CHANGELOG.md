@@ -2,6 +2,10 @@
 
 Newest first. One line per change that matters to a person using or maintaining the app.
 
+## 2026-11-04
+- **Security review** using the attack classes of Cloudflare's security-audit-skill (details and accepted risks: `docs/SECURITY.md`). The secure-cookie flag no longer believes a client-sent X-Forwarded-Proto (set TRUST_PROXY behind an HTTPS proxy). `nodemailer` 9 to 10.3.1 and `compression` to 1.8.2 close all high advisories (9 moderate remain, all inside exceljs). New CI workflow (syntax check, build, npm audit).
+- **UI polish** guided by the Hallmark design skill's floor checks: section and group labels are sentence case instead of tracked capitals, the amber glow on the sign-in art is gone, donut-list rows get a visible keyboard focus ring, small chart and info buttons get finger-sized hit areas on touch screens, smallest text raised to 11 px. Forgot-password suite 50/50, roles 16/16, Excel 264/264 re-run after the changes.
+
 ## 2026-10-28 (latest)
 - **Average / Median switch**: a second switch at the top (Average | Median, default **Average**, default configurable in Settings > Defaults for everyone) decides which figure leads for turnaround, first reply, time to assign and similar times: KPI order, ranking, scatter, fastest list, group charts, sparkline, story text, table column order. The other figure is always beside it (KPI sub-line, tooltips: 'average X · median Y'). New server fields: average first reply per month, average per technician-month, rank by average, average-led insight text; Excel puts average before median. Stored in the address as ?agg=median, not remembered between visits.
 - **Tooltips**: a tooltip with several figures (average, median, count) now stacks one figure per line and wraps, so text is never wider than its box (it was cut off in the technician bar charts). **Top bar**: switches, status and sync buttons now share one group that shrinks gracefully: icon-only sync buttons below 1300 px, the Synced text hidden below 1180 px, tighter spacing below 1000 px; one row from 901 px up.

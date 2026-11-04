@@ -106,7 +106,9 @@ const sessionToken = req => parseCookies(req.headers.cookie)[COOKIE] || null;
 const sessionHashOf = req => { const token = sessionToken(req); return token ? sha(token) : ''; };
 
 const cookieFlags = secure => `Path=/; HttpOnly; SameSite=Lax${secure ? '; Secure' : ''}`;
-const isSecure = req => req.secure || req.headers['x-forwarded-proto'] === 'https';
+// Only the connection itself (or a proxy named in TRUST_PROXY, which Express reads for req.secure) decides: a client-supplied
+// X-Forwarded-Proto header is never believed.
+const isSecure = req => !!req.secure;
 
 function setSessionCookie(res, token, secure) {
   res.append('Set-Cookie', `${COOKIE}=${encodeURIComponent(token)}; ${cookieFlags(secure)}; Max-Age=${sessionHours() * 3600}`);

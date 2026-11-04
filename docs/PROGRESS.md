@@ -16,6 +16,7 @@ Last updated: 2026-10-28 (Average/Median switch, flicker and layout fixes added)
 | graphify graph + AGENTS.md / CLAUDE.md + docs | done | graphify-out/ rebuilt after the last change |
 | Forgot password by email (link, reset page, limits, notice, audit) | done | reset suite 50/50 + browser walk-through desktop and 375 px; see OPERATIONS.md |
 | Average / Median switch (default Average), flicker fix, layout tested 320-1920 px | done | Excel 264/0, roles 16/0, browser probe on every page at 320, 375, 820, 1024, 1365, 1920 px |
+| Security review (Cloudflare audit-skill classes) + dependency fixes + CI | done | docs/SECURITY.md; npm audit 0 high; reset 50/50, roles 16/16, Excel 264/264 |
 | Regression | passing | Excel suite 264/0, role suite 16/0, backup suite 64/0 (last run 2026-10-28 on a clean server) |
 | Browser check (desktop and 375 px): Backups, Settings, Connections, dashboard | done | no horizontal overflow, console clean apart from the expected pre-sign-in 401 |
 

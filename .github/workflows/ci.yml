@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Backend install, syntax check, dependency audit
+        working-directory: backend
+        run: |
+          npm ci
+          for f in server.js routes/*.js services/*.js db/*.js; do node --check "$f"; done
+          npm audit --omit=dev --audit-level=high
+      - name: Frontend install, build, dependency audit
+        working-directory: frontend
+        run: |
+          npm ci
+          npx vite build
+          npm audit --omit=dev --audit-level=high

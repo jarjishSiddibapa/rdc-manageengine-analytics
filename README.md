@@ -101,6 +101,7 @@ The seed script refuses to run unless the database name ends in `_demo`, so it c
 | [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Every setting and what it does |
 | [docs/CHANGELOG.md](docs/CHANGELOG.md) | What changed and why |
 | [SECURITY.md](SECURITY.md) | Reporting a vulnerability and deployment safeguards |
+| [docs/SECURITY.md](docs/SECURITY.md) | Security review: what was checked, accepted risks, running it safely |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Working on the code |
 
 ## Repository map
