@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "sync": "node scripts/sync.js",
-    "sync:deep": "node scripts/sync.js --deep"
+    "sync:deep": "node scripts/sync.js --deep",
+    "seed:demo": "node scripts/seed-demo.js"
   },
   "dependencies": {
     "compression": "^1.8.1",
