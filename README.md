@@ -36,7 +36,7 @@ It keeps its own MySQL copy of the SR data so every screen is fast, and it **onl
 | ![SR list](docs/screenshots/04-sr-list.png) | ![SR timeline](docs/screenshots/08-sr-timeline.png) |
 | **All SRs**: sortable, searchable, exportable. | **SR timeline**: who it was assigned to, replies, status changes and how long each step took. |
 | ![Data and sync](docs/screenshots/05-data-sync.png) | ![Sign in](docs/screenshots/01-sign-in.png) |
-| **Data and sync**: manual and automatic syncs, SR-history progress and run history. | **Sign in**: lockouts, password reset by email, forced change of temporary passwords. |
+| **Data and sync**: manual and automatic syncs, SR-history progress and run history. | **Sign in**: lockouts, welcome and password-reset emails, forced change of temporary passwords. |
 
 ## How it works
 

@@ -155,11 +155,15 @@ const SCHEMA = [
   int('password_reset_gap_minutes', 'Password reset', 'Wait between reset emails to the same address (minutes)', 2, 0, 60, 'Stops someone filling a mailbox. 0 allows a new email at once.', { unit: 'minutes' }),
   int('password_reset_ip_per_hour', 'Password reset', 'Reset requests per hour from one address', 10, 1, 500, 'Beyond this, further requests from that address are refused until the hour has passed.', { unit: 'requests' }),
 
+  bool('welcome_email_enabled', 'Welcome email', 'Email new users a link to set their password', true,
+    'Offered when an administrator adds a user, and ticked to begin with. It works only while email is set up (Admin > Connections).'),
+  int('welcome_link_hours', 'Welcome email', 'Welcome link stays valid for (hours)', 72, 1, 720, 'The link works once. After this time, send the welcome email again from Admin > Users.', { unit: 'hours' }),
+
   // ───────────── Identity ─────────────
   text('app_name', 'Names', 'Application name', 'RDC ManageEngine SR Analytics', 60, 'Shown in the sidebar, the sign-in page, the browser tab, emails and Excel files.', { required: true }),
   text('org_name', 'Names', 'Organisation name', '', 80, 'Optional. Shown under the application name on the sign-in page.'),
   text('public_url', 'Names', 'Web address people use to open this app', '', 200,
-    'Used for the link in password-reset emails, for example http://servername:7780 or https://analytics.yourcompany.com. Blank uses http://localhost and the port, which only works on the PC that runs the app. It is never taken from the browser, so a forged request cannot point the link elsewhere.'),
+    'Used for the links in welcome and password-reset emails, for example http://servername:7780 or https://analytics.yourcompany.com. Blank uses http://localhost and the port, which only works on the PC that runs the app. It is never taken from the browser, so a forged request cannot point the link elsewhere.'),
   text('sidebar_subtitle', 'Names', 'Sidebar subtitle', 'Service desk', 40, ''),
   text('login_subtitle', 'Sign-in page', 'Sign-in page subtitle', 'Service desk performance', 60, ''),
   text('login_headline', 'Sign-in page', 'Sign-in page headline', 'See how every technician is really performing.', 120, ''),
@@ -197,7 +201,7 @@ const SCHEMA = [
 const SECTION_GROUP = {
   'Automatic sync': 'sync', 'Daily deep sync': 'sync', 'Talking to ManageEngine': 'sync', 'SR history': 'sync',
   'Closing-time targets': 'analytics', Buckets: 'analytics', 'Ranking, windows & lists': 'analytics', 'Insight wording': 'analytics', Regions: 'analytics', 'Defaults for everyone': 'analytics',
-  Sessions: 'security', 'Sign-in lockout': 'security', Passwords: 'security', 'Password reset': 'security', 'Requests & exports': 'security',
+  Sessions: 'security', 'Sign-in lockout': 'security', Passwords: 'security', 'Password reset': 'security', 'Welcome email': 'security', 'Requests & exports': 'security',
   Names: 'identity', 'Sign-in page': 'identity', 'Time zone': 'identity', 'Excel files': 'reports', Limits: 'reports', 'Backup limits': 'reports',
 };
 for (const def of SCHEMA) if (!def.group) def.group = SECTION_GROUP[def.section];

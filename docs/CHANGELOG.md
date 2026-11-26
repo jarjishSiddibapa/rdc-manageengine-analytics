@@ -3,6 +3,7 @@
 Newest first. One line per change that matters to a person using or maintaining the app.
 
 ## 2026-11-26
+- **Welcome email**: adding a user can email them a one-time link to set their own password (no password is sent), with **Send welcome email** for a fresh link before first sign-in. Settings `welcome_email_enabled`, `welcome_link_hours`; column `password_resets.purpose` (added at start). Emailed links are now cancelled when an administrator changes the address, disables the account or resets the password.
 - **Renamed** to RDC ManageEngine SR Analytics (screens, tab, emails, Excel files, startup window). Internal names (database, backup file names, request header) are unchanged, so existing data and backups keep working.
 - **Active and inactive technicians**: Technicians > Active / inactive (administrators and managers, many at once) or the switch on a profile; an Active only | All technicians switch filters dashboards, lists and Excel files. New table `inactive_technicians`, setting `default_technician_scope`.
 - **Filters**: added sub-category, region, site, department, mode and requester; main filters on the bar, the rest under More filters; sub-category follows category and site follows region; region rules are a setting. Fixed: a long multi-selection (over 300 characters) was silently cut off by the server.

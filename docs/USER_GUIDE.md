@@ -79,6 +79,10 @@ npm run sync:deep     # deep sync
 
 Admin → **Backups** makes a complete copy of the database (SRs, history, users, settings; not the sign-in sessions) with `mysqldump`, once a day at the time you set (default 02:00), into `backend\db-backup\`. If the PC was off at that time, a backup runs when the app next starts. The newest N backups are kept (default 14). A dump is kept only when it finished completely. You can run one now, download or delete any, and the tab shows how to restore. Optionally each backup is **emailed** (compressed, to the addresses you list) and a failure email is sent when a backup fails; enter the mail account under Admin → Connections and use *Send a test email*. Backups contain password hashes and all SR data: keep the folder and the emails private. Details: `docs/OPERATIONS.md`.
 
+## Welcome email for new users
+
+When email is set up, **Add user** offers **Email them a link to set their own password** (on to begin with). Nobody types or sends a password: the person gets a link, valid once for 72 hours by default, chooses a password and signs in with their email address. If the link expired or the email failed, use **Send welcome email** in the menu next to their name (offered until their first sign-in). Changing their email address, disabling the account or resetting their password cancels a link already sent. Switch the offer off, or change how long links last, under Settings → Security → Welcome email. Without email, give a temporary password as before.
+
 ## Forgot password
 
 When email is set up, the sign-in page offers **Forgot your password?**: the person enters their email address and receives a link (valid once, 60 minutes by default) to choose a new password; they are signed out everywhere and a notice is emailed. Set **Web address** under Admin → Settings → Identity so the link opens on the right address, and switch the feature off or tune its limits under Settings → Security → Password reset. Without email, an administrator resets passwords under Admin → Users.

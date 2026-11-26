@@ -146,6 +146,24 @@ async function sendPasswordResetEmail({ to, name, url, minutes }) {
   });
 }
 
+// To a person an administrator just added: no password travels by email, only a one-time link to choose their own.
+async function sendWelcomeEmail({ to, name, url, hours, signInUrl, invitedBy, canReset }) {
+  const lasts = hours % 24 === 0 ? `${hours / 24} day${hours === 24 ? '' : 's'}` : `${hours} hour${hours === 1 ? '' : 's'}`;
+  const expired = canReset ? 'use "Forgot your password?" on the sign-in page, or ask an administrator' : 'ask an administrator to send a new one';
+  await sendMail({
+    to,
+    subject: `Your account for ${appName()}`,
+    html: layout(`
+      ${greeting(name)}
+      <p>${invitedBy ? `${escapeHtml(invitedBy)} has` : 'An administrator has'} created an account for you on ${escapeHtml(appName())}. You sign in with this email address: <b>${escapeHtml(to)}</b></p>
+      <p>Start by choosing your password. The link works once and expires in ${escapeHtml(lasts)}.</p>
+      <p style="margin: 22px 0;"><a href="${escapeHtml(url)}" style="background: ${BRAND}; color: #fff; text-decoration: none; padding: 12px 26px; border-radius: 6px; font-weight: 600; display: inline-block;">Set your password</a></p>
+      <p style="font-size: 12px; color: #5b6b80; word-break: break-all;">Or copy this address into your browser: ${escapeHtml(url)}</p>
+      <p style="font-size: 13px; color: #5b6b80;">After that, sign in at <a href="${escapeHtml(signInUrl)}">${escapeHtml(signInUrl)}</a>. If the link has expired, ${escapeHtml(expired)}.</p>`),
+    text: `An account was created for you on ${appName()}. You sign in with ${to}.\nSet your password: ${url}\nThe link works once and expires in ${lasts}. After that, sign in at ${signInUrl}. If the link has expired, ${expired}.`,
+  });
+}
+
 async function sendPasswordChangedEmail({ to, name, when }) {
   await sendMail({
     to,
@@ -186,4 +204,4 @@ async function testConnection(overrides = {}, { to = null, sentBy = null } = {})
   }
 }
 
-module.exports = { testConnection, isConfigured, verifyMailer, sendMail, sendBackupEmail, sendBackupFailedEmail, sendPasswordResetEmail, sendPasswordChangedEmail, sendTestEmail, escapeHtml, formatBytes, layout };
+module.exports = { testConnection, isConfigured, verifyMailer, sendMail, sendBackupEmail, sendBackupFailedEmail, sendPasswordResetEmail, sendWelcomeEmail, sendPasswordChangedEmail, sendTestEmail, escapeHtml, formatBytes, layout };

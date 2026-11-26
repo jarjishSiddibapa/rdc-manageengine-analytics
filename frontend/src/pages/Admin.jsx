@@ -5,7 +5,7 @@ import {
   Alert, App as AntApp, Button, Dropdown, Form, Input, InputNumber, Modal, Radio, Select, Skeleton, Space, Switch, Table, Tabs, Tag, Typography,
 } from 'antd';
 import {
-  CopyOutlined, DeleteOutlined, EditOutlined, KeyOutlined, LogoutOutlined, MoreOutlined, PlusOutlined, StopOutlined, CheckCircleOutlined, ReloadOutlined, SearchOutlined, TeamOutlined,
+  CopyOutlined, DeleteOutlined, EditOutlined, KeyOutlined, LogoutOutlined, MailOutlined, MoreOutlined, PlusOutlined, StopOutlined, CheckCircleOutlined, ReloadOutlined, SearchOutlined, TeamOutlined,
 } from '@ant-design/icons';
 import { adminAPI } from '../services/api';
 import { ROLE_LABELS, useAuth } from '../context/Auth';
@@ -60,14 +60,15 @@ function StrengthMeter({ password }) {
 }
 
 // ── Users ──
-function UserForm({ editing, onClose, onSaved }) {
-  const { message } = AntApp.useApp();
+function UserForm({ editing, welcome, onClose, onSaved }) {
+  const { message, modal } = AntApp.useApp();
   const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
   const [problem, setProblem] = useState('');
   const [reveal, setReveal] = useState(false);
   const isNew = !editing?.id;
   const password = Form.useWatch('password', form);
+  const invite = Form.useWatch('send_welcome', form) ?? !!welcome?.available;
   const { config } = useAppConfig();
 
   async function submit(values) {
@@ -75,9 +76,20 @@ function UserForm({ editing, onClose, onSaved }) {
     setProblem('');
     const body = { ...values, name: values.name.trim(), email: values.email.trim().toLowerCase() };
     try {
-      if (isNew) await adminAPI.createUser(body);
-      else await adminAPI.updateUser(editing.id, body);
-      message.success(isNew ? `${body.name} can now sign in` : 'User updated');
+      if (isNew) {
+        const { data } = await adminAPI.createUser(body);
+        if (!data.welcome) message.success(`${body.name} can now sign in`);
+        else if (data.welcome.sent) message.success(data.welcome.message);
+        else {
+          modal.warning({
+            title: `${body.name} was added, but no email went out`,
+            content: `${data.welcome.message}. Use "Send welcome email" in the menu next to their name once email works, or "Reset password" to create a password you can share.`,
+          });
+        }
+      } else {
+        await adminAPI.updateUser(editing.id, body);
+        message.success('User updated');
+      }
       onSaved();
     } catch (error) {
       if (error.response?.status === 409) form.setFields([{ name: 'email', errors: [error.message] }]);
@@ -90,7 +102,7 @@ function UserForm({ editing, onClose, onSaved }) {
       open={!!editing} title={isNew ? 'Add a user' : `Edit ${editing?.name}`} onCancel={onClose} onOk={() => form.submit()} okText={isNew ? 'Create user' : 'Save changes'}
       confirmLoading={saving} destroyOnHidden maskClosable={false} afterOpenChange={open => { if (!open) { setProblem(''); setReveal(false); } }}
     >
-      <Form form={form} layout="vertical" onFinish={submit} requiredMark={false} initialValues={isNew ? { role: 'viewer', must_change_password: true } : editing} style={{ marginTop: 16 }}>
+      <Form form={form} layout="vertical" onFinish={submit} requiredMark={false} clearOnDestroy initialValues={isNew ? { role: 'viewer', must_change_password: true, send_welcome: !!welcome?.available } : editing} style={{ marginTop: 16 }}>
         {problem && <Alert type="error" showIcon title={problem} style={{ marginBottom: 16 }} role="alert" />}
         <Form.Item name="name" label="Full name" rules={[{ required: true, whitespace: true, message: 'Enter their name' }]}><Input maxLength={150} autoFocus autoComplete="off" /></Form.Item>
         <Form.Item
@@ -100,7 +112,21 @@ function UserForm({ editing, onClose, onSaved }) {
         <Form.Item name="role" label="Role" extra={<Form.Item noStyle shouldUpdate>{() => ROLE_HELP[form.getFieldValue('role')]}</Form.Item>}>
           <Select options={Object.entries(ROLE_LABELS).map(([value, label]) => ({ value, label }))} />
         </Form.Item>
-        {isNew && (
+        {isNew && welcome?.available && (
+          <Form.Item
+            name="send_welcome" label="Email them a link to set their own password" valuePropName="checked"
+            extra={invite ? (
+              <>
+                The link works once, for {welcome.hours} hours. No password is sent by email.
+                {welcome.local_only && <div className="invite-warning">No web address is set, so the link only opens on the PC that runs this app. Set it under Admin &gt; Settings &gt; Identity.</div>}
+              </>
+            ) : null}
+          ><Switch /></Form.Item>
+        )}
+        {isNew && welcome?.blocked === 'no_email' && (
+          <Alert type="info" showIcon style={{ marginBottom: 16 }} title="To email new users a link to set their password, set up email under Admin > Connections." />
+        )}
+        {isNew && !invite && (
           <>
             <Form.Item label="Temporary password" required extra="Share it with them privately. Use Generate for a strong one, then Copy.">
               <Space.Compact style={{ width: '100%' }}>
@@ -239,6 +265,7 @@ function Users() {
           items: [
             { key: 'edit', icon: <EditOutlined />, label: 'Edit details and role' },
             { key: 'reset', icon: <KeyOutlined />, label: 'Reset password' },
+            ...(data?.welcome?.available && u.active && !u.last_login_at && u.id !== me.id ? [{ key: 'welcome', icon: <MailOutlined />, label: 'Send welcome email' }] : []),
             { key: 'revoke', icon: <LogoutOutlined />, label: 'Sign out of all devices', disabled: !u.active_sessions },
             { type: 'divider' },
             u.active
@@ -249,6 +276,12 @@ function Users() {
           onClick: ({ key }) => {
             if (key === 'edit') setEditing(u);
             else if (key === 'reset') setResetting(u);
+            else if (key === 'welcome') {
+              modal.confirm({
+                title: `Send ${u.name} a welcome email?`, content: `A new link to set their password goes to ${u.email}. Any earlier link stops working.`, okText: 'Send email',
+                onOk: () => act(u.id, {}, () => adminAPI.sendWelcome(u.id), `Welcome email sent to ${u.email}`),
+              });
+            }
             else if (key === 'revoke') {
               modal.confirm({
                 title: `Sign ${u.name} out of all devices?`, content: 'They can sign straight back in with their password.', okText: 'Sign out',
@@ -305,7 +338,7 @@ function Users() {
           {Object.keys(ROLE_LABELS).map(r => <li key={r}><span className="dot info" /><span><Tag color={ROLE_COLOR[r]}>{ROLE_LABELS[r]}</Tag>{ROLE_HELP[r]}</span></li>)}
         </ul>
       </section>
-      <UserForm editing={editing} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); reload(); }} />
+      <UserForm editing={editing} welcome={data?.welcome} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); reload(); }} />
       <ResetPassword user={resetting} onClose={() => { setResetting(null); reload(); }} />
     </>
   );
@@ -319,6 +352,7 @@ const ACTION_LABELS = {
   history_started: 'Started SR history', history_rebuild_started: 'Rebuilt SR history', history_stopped: 'Stopped SR history',
   connections_updated: 'Changed connections', connection_tested: 'Tested a connection', sync_stopped: 'Stopped sync',
   technicians_status_changed: 'Changed active technicians',
+  welcome_email_sent: 'Sent a welcome email', welcome_email_failed: 'Welcome email failed',
   password_reset_requested: 'Asked for a password reset link', password_reset_completed: 'Reset password with a link', password_reset_failed: 'Failed password reset link',
 };
 const ACTION_COLOR = { login_failed: 'red', user_deleted: 'red', user_disabled: 'orange', password_reset: 'gold', settings_updated: 'purple', connections_updated: 'purple', sync_started: 'blue', deep_sync_started: 'blue' };

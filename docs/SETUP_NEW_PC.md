@@ -51,7 +51,7 @@ cmd /c '"C:\Program Files\MySQL\MySQL Server 9.5\bin\mysql.exe" -u root -p --def
 
 Double-click `C:\rdc-analytics\startup.bat`. The first run needs internet and takes a few minutes. Leave the window open and go to <http://localhost:7780>.
 
-After a restore, sign in with the same accounts as on the old PC.
+After a restore, sign in with the same accounts as on the old PC. The email account comes across too (with `.env` and `.secret`); check it with **Admin > Connections > Send a test email**, and update **Web address** if people will open the new PC, so emailed links point to it.
 
 | `startup.bat` says | Do this |
 |---|---|

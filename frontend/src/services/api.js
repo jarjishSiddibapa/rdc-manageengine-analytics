@@ -123,6 +123,7 @@ export const adminAPI = {
   updateUser: (id, body) => request('PATCH', `/admin/users/${id}`, { body }),
   resetPassword: (id, password) => request('POST', `/admin/users/${id}/reset-password`, { body: password ? { password } : {} }),
   revokeSessions: id => request('POST', `/admin/users/${id}/revoke-sessions`),
+  sendWelcome: id => request('POST', `/admin/users/${id}/welcome`),
   deleteUser: id => request('DELETE', `/admin/users/${id}`),
   audit: params => request('GET', '/admin/audit', { params }),
   settings: () => request('GET', '/admin/settings'),

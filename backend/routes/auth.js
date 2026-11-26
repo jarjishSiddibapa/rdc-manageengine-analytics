@@ -72,9 +72,9 @@ publicRouter.post('/auth/reset-password/check', async (req, res) => {
   const row = await passwordReset.lookup(req.body?.token);
   if (!row) {
     passwordReset.badToken.fail(audit.clientIp(req) || 'unknown');
-    return res.status(400).json({ message: 'This reset link is not valid any more. Ask for a new one.', code: 'LINK_INVALID' });
+    return res.status(400).json({ message: 'This link is not valid any more. Ask for a new one.', code: 'LINK_INVALID' });
   }
-  res.json({ ok: true, name: row.name, email: row.email });
+  res.json({ ok: true, name: row.name, email: row.email, purpose: row.purpose });
 });
 
 publicRouter.post('/auth/reset-password', async (req, res) => {
@@ -119,6 +119,7 @@ privateRouter.post('/auth/change-password', async (req, res) => {
   await pool.query('UPDATE users SET password_hash = ?, must_change_password = 0 WHERE id = ?', [await auth.hashPassword(next), req.user.id]);
   // Every other device is signed out; this one stays.
   await pool.query('DELETE FROM sessions WHERE user_id = ? AND token_hash <> ?', [req.user.id, auth.sessionHashOf(req)]);
+  await passwordReset.revoke(req.user.id);
   await audit.record(req, 'password_changed', { target: req.user.email });
   res.json({ ok: true });
 });

@@ -183,6 +183,13 @@ Sessions, sign-in lockout, passwords and request limits. New limits apply to the
 | Wait between reset emails to the same address (minutes) | `password_reset_gap_minutes` | 2 minutes | 0 to 60 |
 | Reset requests per hour from one address | `password_reset_ip_per_hour` | 10 requests | 1 to 500 |
 
+**Welcome email**
+
+| Setting | Key | Default | Allowed |
+|---|---|---|---|
+| Email new users a link to set their password | `welcome_email_enabled` | On | On / Off |
+| Welcome link stays valid for (hours) | `welcome_link_hours` | 72 hours | 1 to 720 |
+
 ### Identity
 The names, texts and time zone shown to your people.
 

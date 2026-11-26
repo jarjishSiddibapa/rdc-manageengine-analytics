@@ -22,12 +22,17 @@ If the PC is off at the deep-sync time, the deep sync runs when the app next sta
 - **Method**: `mysqldump` of the whole database into one `.sql` file in `backend\db-backup\` (restores on any MySQL server). Done daily at the configured time; if the PC was off, a catch-up backup runs on the next start. The newest N backups are kept (default 14). `sessions` are not included.
 - **Checks**: a dump is only kept when it finished (ends with the `-- Dump completed` line); partial files are discarded.
 - **Email** (optional): each backup is emailed, compressed (.gz), to the recipients you list; backups too big to attach (default over 20 MB compressed) are not attached and the email says where the file is. A failure email is sent when a backup fails. Use **Send a test email** to check the setup.
-- **Email setup**: put `SMTP_USER` and `SMTP_PASS` in `backend\.env` (Gmail: an *App password*, not the normal password; `SMTP_HOST` defaults to smtp.gmail.com, port 587) or enter them under Admin → Connections, then restart.
+- **Email setup** (used for backups, welcome emails and forgot password): enter the account under Admin → Connections and press **Send a test email**; it takes effect at once. Or put `SMTP_USER` and `SMTP_PASS` in `backend\.env` and restart. Gmail and Google Workspace need an *App password*, not the normal password; the server defaults to smtp.gmail.com, port 587.
 - **mysqldump** is found automatically in `C:\Program Files\MySQL\...`; otherwise set `MYSQLDUMP_PATH`.
 
 ### Restore
 1. Close the app. 2. Get the `.sql` (unzip the `.gz` from an email). 3. In a Command Prompt: `mysql -u root -p < manageengine-analytics-YYYYMMDD-HHMMSS.sql`. 4. Start the app; people sign in again.
 This replaces the whole `manageengine_analytics` database with the backup's state.
+
+## Welcome email (new users)
+- Offered under Admin > Users > Add user when it is switched on (Admin > Settings > Security > Welcome email) and email is set up. The mail holds a one-time link (default 72 hours) to choose a password; no password is emailed. **Send welcome email** in a person's menu sends a fresh link until they have signed in once.
+- If sending fails the account is still created, the screen says why, and the Activity log shows "Welcome email failed".
+- The link uses the same **web address** setting as below.
 
 ## Forgot password (by email)
 - The sign-in page shows **Forgot your password?** when it is switched on (Admin > Settings > Security > Password reset) **and** email is set up (Admin > Connections). People enter their address and get a link that works once and expires (default 60 minutes). Choosing a new password signs them out everywhere and a notice goes to their mailbox. Every step is in the Activity log.
@@ -47,7 +52,9 @@ This replaces the whole `manageengine_analytics` database with the backup's stat
 | Locked out of sign-in | wait 15 minutes, or another administrator resets the password |
 | "Forgot your password?" missing | email is not set up (Admin > Connections) or the feature is off (Settings > Security) |
 | Reset email never arrives | check the spam folder; Admin > Activity log shows "Asked for a password reset link" with the reason (no email sent / could not be sent) |
-| Reset link opens "localhost" and fails on another PC | set the web address under Settings > Identity > Names |
+| No "email them a link" switch under Add user | email is not set up, or Welcome email is off (Settings > Security) |
+| Welcome email failed | the screen and Admin > Activity give the mail server's reason; fix it, then **Send welcome email** |
+| Reset or welcome link opens "localhost" and fails on another PC | set the web address under Settings > Identity > Names |
 
 ## Security checklist
 Change the default administrator password after the first sign-in. Keep `HOST=127.0.0.1` unless you want to share the app, and then put it behind HTTPS. Treat `backend\db-backup` and backup emails as sensitive.

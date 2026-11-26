@@ -1,8 +1,11 @@
+const crypto = require('crypto');
 const express = require('express');
 const { pool } = require('../db/pool');
 const auth = require('../services/auth');
 const audit = require('../services/audit');
 const settings = require('../services/settings');
+const mailer = require('../services/mailer');
+const passwordReset = require('../services/passwordReset');
 
 const router = express.Router();
 router.use(auth.requireRole('admin'));
@@ -57,19 +60,28 @@ router.get('/users', async (_req, res) => {
   const [rows] = await pool.query(`
     SELECT ${USER_FIELDS.split(', ').map(f => `u.${f}`).join(', ')}, (SELECT COUNT(*) FROM sessions s WHERE s.user_id = u.id AND s.expires_at > NOW()) AS active_sessions
     FROM users u ORDER BY u.active DESC, u.name`);
-  res.json({ users: rows.map(u => ({ ...auth.publicUser(u), active_sessions: u.active_sessions })), roles: auth.ROLES });
+  res.json({ users: rows.map(u => ({ ...auth.publicUser(u), active_sessions: u.active_sessions })), roles: auth.ROLES, welcome: welcomeStatus() });
 });
 
+// Whether a welcome email can be sent, and what the "Add a user" screen should say about it.
+function welcomeStatus() {
+  const blocked = !settings.flag('welcome_email_enabled') ? 'off' : !mailer.isConfigured() ? 'no_email' : null;
+  return { available: !blocked, blocked, hours: settings.num('welcome_link_hours'), local_only: !settings.str('public_url') };
+}
+
 router.post('/users', async (req, res) => {
-  const data = readUserBody(req.body, { requirePassword: true });
+  // With a welcome email nobody types a password: the account gets an unknowable one until the person sets their own from the link.
+  const invite = req.body?.send_welcome === true;
+  const data = readUserBody(req.body, { requirePassword: !invite });
   if (data.error) return res.status(400).json({ message: data.error });
+  if (invite && !passwordReset.welcomeAvailable()) return res.status(400).json({ message: 'Welcome emails are not available. Set up email under Admin > Connections, or give a temporary password instead.' });
   const [[taken]] = await pool.query('SELECT id FROM users WHERE email = ?', [data.email]);
   if (taken) return res.status(409).json({ message: 'Someone already uses that email address' });
   let result;
   try {
     [result] = await pool.query(
       'INSERT INTO users (name, email, password_hash, role, active, must_change_password) VALUES (?, ?, ?, ?, 1, ?)',
-      [data.name, data.email, await auth.hashPassword(req.body.password), data.role, req.body.must_change_password === false ? 0 : 1],
+      [data.name, data.email, await auth.hashPassword(invite ? crypto.randomBytes(48).toString('base64url') : req.body.password), data.role, invite || req.body.must_change_password === false ? 0 : 1],
     );
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ message: 'Someone already uses that email address' });
@@ -77,7 +89,22 @@ router.post('/users', async (req, res) => {
   }
   await audit.record(req, 'user_created', { target: data.email, detail: `Role: ${data.role}` });
   const [[user]] = await pool.query(`SELECT ${USER_FIELDS} FROM users WHERE id = ?`, [result.insertId]);
-  res.status(201).json({ user: auth.publicUser(user) });
+  // The account exists either way; a failed email is reported so the administrator can send it again.
+  const welcome = invite ? await passwordReset.sendWelcome(req, user) : undefined;
+  res.status(201).json({ user: auth.publicUser(user), welcome });
+});
+
+// Sends the welcome email again, to someone who has never signed in.
+router.post('/users/:id/welcome', async (req, res) => {
+  const id = idOf(req.params.id);
+  const [[user]] = id ? await pool.query('SELECT * FROM users WHERE id = ?', [id]) : [[]];
+  if (!user) return res.status(404).json({ message: 'User not found' });
+  if (!passwordReset.welcomeAvailable()) return res.status(400).json({ message: 'Welcome emails are not available. Set up email under Admin > Connections.' });
+  if (!user.active) return res.status(400).json({ message: 'Enable the account first' });
+  if (user.last_login_at) return res.status(400).json({ message: 'They have signed in already. Use "Reset password" instead.' });
+  const welcome = await passwordReset.sendWelcome(req, user);
+  if (!welcome.sent) return res.status(502).json({ message: welcome.message });
+  res.json({ ok: true, message: welcome.message });
 });
 
 router.patch('/users/:id', async (req, res) => {
@@ -106,6 +133,8 @@ router.patch('/users/:id', async (req, res) => {
     // Disabled, or a different role: every device is signed out, so the old permissions can never outlive the change.
     // Email changes also end the sessions (the account is now a different identity), except an administrator editing their own.
     if (!active || data.role !== existing.role || (data.email !== existing.email && id !== req.user.id)) await conn.query('DELETE FROM sessions WHERE user_id = ?', [id]);
+    // A link already emailed (perhaps to a mistyped address) stops working when the address changes or the account is disabled.
+    if (!active || data.email !== existing.email) await passwordReset.revoke(id, conn);
     return { existing, data, active };
   });
   if (outcome.status) return res.status(outcome.status).json({ message: outcome.message });
@@ -133,6 +162,7 @@ router.post('/users/:id/reset-password', async (req, res) => {
   if (problem) return res.status(400).json({ message: problem });
   await pool.query('UPDATE users SET password_hash = ?, must_change_password = ? WHERE id = ?', [await auth.hashPassword(password), id === req.user.id ? 0 : 1, id]);
   await pool.query('DELETE FROM sessions WHERE user_id = ? AND NOT (user_id = ? AND token_hash = ?)', [id, req.user.id, auth.sessionHashOf(req)]);
+  await passwordReset.revoke(id);
   await audit.record(req, 'password_reset', { target: user.email });
   res.json({ ok: true, password: generated ? password : undefined });
 });

@@ -58,7 +58,7 @@ export function ForgotPassword() {
   );
 }
 
-// Step 2: the page the emailed link opens.
+// Step 2: the page an emailed link opens - for a forgotten password, or a new user setting their first one.
 export function ResetPassword() {
   const { config } = useAppConfig();
   const navigate = useNavigate();
@@ -70,7 +70,9 @@ export function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [problem, setProblem] = useState(null);
 
-  useEffect(() => { document.title = `Choose a new password · ${config.app_name}`; }, [config.app_name]);
+  const welcome = account?.purpose === 'welcome';
+  const heading = welcome ? 'Set your password' : 'Choose a new password';
+  useEffect(() => { document.title = `${heading} · ${config.app_name}`; }, [heading, config.app_name]);
 
   // The token is read once, then taken out of the address bar so it does not stay in the history.
   useEffect(() => {
@@ -114,8 +116,8 @@ export function ResetPassword() {
   if (state === 'done') {
     return (
       <AuthFrame>
-        <Result style={{ padding: '8px 0' }} icon={<CheckCircleFilled style={{ color: '#16a34a' }} />} title="Password changed"
-          subTitle="You were signed out on every device. Sign in with your new password."
+        <Result style={{ padding: '8px 0' }} icon={<CheckCircleFilled style={{ color: '#16a34a' }} />} title={welcome ? 'Password set' : 'Password changed'}
+          subTitle={welcome ? `Sign in with ${account.email} and the password you just chose.` : 'You were signed out on every device. Sign in with your new password.'}
           extra={<Button type="primary" size="large" onClick={() => { window.location.assign('/'); }}>Go to sign in</Button>} />
       </AuthFrame>
     );
@@ -123,20 +125,20 @@ export function ResetPassword() {
 
   return (
     <AuthFrame>
-      <h1>Choose a new password</h1>
-      <p className="lead">For <b>{account?.email}</b>. {passwordHint(config.password)}</p>
+      <h1>{heading}</h1>
+      <p className="lead">{welcome ? 'Welcome. This account is' : 'For'} <b>{account?.email}</b>. {passwordHint(config.password)}</p>
       {problem && <Alert type="error" showIcon role="alert" message={problem} style={{ marginBottom: 16 }} />}
       <Form form={form} layout="vertical" onFinish={submit} requiredMark={false} autoComplete="off">
-        <Form.Item name="password" label="New password" rules={[{ required: true, message: 'Choose a new password' }, ...passwordRules(config.password)]}>
-          <Input.Password size="large" prefix={<LockOutlined style={{ color: 'var(--text-3)' }} />} autoComplete="new-password" autoFocus placeholder="New password" />
+        <Form.Item name="password" label={welcome ? 'Password' : 'New password'} rules={[{ required: true, message: 'Choose a password' }, ...passwordRules(config.password)]}>
+          <Input.Password size="large" prefix={<LockOutlined style={{ color: 'var(--text-3)' }} />} autoComplete="new-password" autoFocus placeholder={welcome ? 'Password' : 'New password'} />
         </Form.Item>
-        <Form.Item name="confirm" label="Repeat the new password" dependencies={['password']} rules={[
-          { required: true, message: 'Repeat the new password' },
+        <Form.Item name="confirm" label={welcome ? 'Repeat the password' : 'Repeat the new password'} dependencies={['password']} rules={[
+          { required: true, message: 'Repeat the password' },
           ({ getFieldValue }) => ({ validator: (_, v) => (!v || getFieldValue('password') === v ? Promise.resolve() : Promise.reject(new Error('The two passwords are not the same'))) }),
         ]}>
           <Input.Password size="large" prefix={<LockOutlined style={{ color: 'var(--text-3)' }} />} autoComplete="new-password" placeholder="Repeat it" />
         </Form.Item>
-        <Button type="primary" htmlType="submit" size="large" block loading={loading}>Change password</Button>
+        <Button type="primary" htmlType="submit" size="large" block loading={loading}>{welcome ? 'Set password' : 'Change password'}</Button>
       </Form>
     </AuthFrame>
   );

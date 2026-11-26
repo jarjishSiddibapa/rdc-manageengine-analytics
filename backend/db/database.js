@@ -12,6 +12,15 @@ async function ensureIndex(table, name, columns) {
   return true;
 }
 
+// Same idea for a column added after the first release.
+async function ensureColumn(table, name, definition) {
+  const [[{ n }]] = await pool.query(
+    'SELECT COUNT(*) AS n FROM information_schema.columns WHERE table_schema = ? AND table_name = ? AND column_name = ?',
+    [DB_NAME, table, name],
+  );
+  if (!n) await pool.query(`ALTER TABLE \`${table}\` ADD COLUMN \`${name}\` ${definition}`);
+}
+
 // Creates the application's own database (never touches any other) and its tables.
 // recoverRuns: mark a sync left "running" by a crash as failed. A second copy of the app started for testing passes false so it
 // cannot mark the first copy's live run as failed.
@@ -129,7 +138,7 @@ async function initDb({ recoverRuns = true } = {}) {
     ) ${tail}
   `);
 
-  // One row per reset link sent. Only the hash of the token is kept, so the table alone cannot be used to reset anyone's password.
+  // One row per emailed set-password link (forgotten password, or a new user's welcome). Only the hash of the token is kept, so the table alone cannot be used to reset anyone's password.
   await pool.query(`
     CREATE TABLE IF NOT EXISTS password_resets (
       token_hash CHAR(64) NOT NULL PRIMARY KEY,
@@ -247,6 +256,9 @@ async function initDb({ recoverRuns = true } = {}) {
       INDEX idx_backup_file (filename)
     ) ${tail}
   `);
+
+  // What the link was sent for: 'reset' or 'welcome'.
+  await ensureColumn('password_resets', 'purpose', "VARCHAR(10) NOT NULL DEFAULT 'reset'");
 
   // Indexes added after the first release (each only if missing; checked against the real queries with EXPLAIN).
   // "Which SRs still need their history collected" is polled by the Data & sync screen and reads in_scope + last_updated_at for every SR;
