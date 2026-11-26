@@ -23,11 +23,11 @@ Last updated: 2026-11-26 (renamed to RDC ManageEngine SR Analytics; active/inact
 | Rename to RDC ManageEngine SR Analytics | done | browser check; internal identifiers unchanged |
 | Active / inactive technicians; sub-category, region, site and other filters | done | feature checks 80/0 against SQL on a throwaway copy of the database; browser check at 1366 and 375 px |
 | New-PC setup: startup.bat, docs/SETUP_NEW_PC.md | done | see CHANGELOG 2026-11-26 |
-| startup.bat repairs damaged or half-installed libraries | done, not yet confirmed on the second PC | reproduced "not a valid Win32 application" in a test copy; damaged build file, interrupted install, damaged server library, offline fallback and a healthy second run all behaved |
+| startup.bat repairs damaged or half-installed libraries | done; the user confirmed the app started on the second PC | reproduced "not a valid Win32 application" in a test copy; damaged build file, interrupted install, damaged server library, offline fallback and a healthy second run all behaved |
 | Browser check (desktop and 375 px): Backups, Settings, Connections, dashboard | done | no horizontal overflow, console clean apart from the expected pre-sign-in 401 |
 
 ## Needs the user (cannot be done by the assistant)
-1. The app was restarted on 2026-11-26 (new code is live). Press Ctrl+F5, then mark inactive technicians under Technicians > Active / inactive. To move to another PC follow docs/SETUP_NEW_PC.md.
+1. The app was restarted on 2026-11-26 (new code is live). Press Ctrl+F5, then mark inactive technicians under Technicians > Active / inactive. The app now also runs on a second PC: make sure only one PC syncs (docs/SETUP_NEW_PC.md, step 6).
 2. Change the default administrator password after the first sign-in.
 3. Email is set up on this PC (2026-11-26): "Forgot your password?" and welcome emails are on, and the mail server accepted a sample welcome mail. Check that it reached the inbox. HOST=0.0.0.0 is set on this PC, so links use its network address. If the App password was ever shared in a chat or message, replace it under Admin > Connections. The assistant does not type passwords.
 4. Keep a copy of backend\.secret (it decrypts the saved passwords). Backups do not include it.
