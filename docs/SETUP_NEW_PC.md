@@ -59,6 +59,9 @@ After a restore, sign in with the same accounts as on the old PC. The email acco
 | `backend\.env` was created and opened | you skipped step 3: replace it with your copy |
 | MySQL is not reachable | start the MySQL service (Windows Services), check `DB_HOST` / `DB_PORT` |
 | Port 7780 is already in use | the app is already running, or set another `PORT` in `.env` |
+| a library or build error, such as "not a valid Win32 application" or "Cannot find native binding" | a damaged library, often from an install that was cut short. The script installs the libraries afresh and tries again by itself. If it still fails, check that antivirus is not blocking the folder, delete the `node_modules` folders inside `backend` and `frontend`, and run it again with internet |
+
+Do not copy the `node_modules` folders from another PC, and do not close the window while libraries are installing.
 
 ## 6. Decide which PC syncs
 

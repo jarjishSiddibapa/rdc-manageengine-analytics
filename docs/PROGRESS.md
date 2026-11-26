@@ -2,7 +2,7 @@
 
 Keep this file current. It is the first thing a new session (or a person) reads to continue exactly where the last one stopped, without re-deriving anything. Update it at the end of every piece of work, before starting the next one.
 
-Last updated: 2026-11-26 (renamed to RDC ManageEngine SR Analytics; active/inactive technicians; more filters; new-PC setup; welcome email; network-address links; forgot-password link shows right after email setup).
+Last updated: 2026-11-26 (renamed to RDC ManageEngine SR Analytics; active/inactive technicians; more filters; new-PC setup; welcome email; network-address links; forgot-password link shows right after email setup; startup.bat library repair).
 
 ## State: all requested work is built and tested
 
@@ -23,6 +23,7 @@ Last updated: 2026-11-26 (renamed to RDC ManageEngine SR Analytics; active/inact
 | Rename to RDC ManageEngine SR Analytics | done | browser check; internal identifiers unchanged |
 | Active / inactive technicians; sub-category, region, site and other filters | done | feature checks 80/0 against SQL on a throwaway copy of the database; browser check at 1366 and 375 px |
 | New-PC setup: startup.bat, docs/SETUP_NEW_PC.md | done | see CHANGELOG 2026-11-26 |
+| startup.bat repairs damaged or half-installed libraries | done, not yet confirmed on the second PC | reproduced "not a valid Win32 application" in a test copy; damaged build file, interrupted install, damaged server library, offline fallback and a healthy second run all behaved |
 | Browser check (desktop and 375 px): Backups, Settings, Connections, dashboard | done | no horizontal overflow, console clean apart from the expected pre-sign-in 401 |
 
 ## Needs the user (cannot be done by the assistant)

@@ -60,22 +60,38 @@ if not errorlevel 1 (
 REM ---- 4. Server libraries (kept in backend\node_modules, Node's version of a virtual environment) ----
 call :packages backend
 if errorlevel 1 goto :failed
+REM A damaged file only shows up when the library is loaded.
+call :loads backend
+if not errorlevel 1 goto :screens
+echo [!] A server library is damaged. Installing them again from scratch...
+call :reinstall backend
+if errorlevel 1 goto :failed
+call :loads backend
+if errorlevel 1 goto :failed
 
 REM ---- 5. Screens: build when missing, or when the source is newer than the last build ----
+:screens
 set NEEDBUILD=0
 if not exist "frontend\dist\index.html" set NEEDBUILD=1
 if %NEEDBUILD%==0 if exist "frontend\src" (
   powershell -NoProfile -Command "$built=(Get-Item 'frontend\dist\index.html').LastWriteTime; $src=Get-ChildItem 'frontend\src','frontend\index.html','frontend\package.json','frontend\package-lock.json','frontend\vite.config.js' -Recurse -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1; if ($src -and $src.LastWriteTime -gt $built) { exit 1 } else { exit 0 }" >nul 2>&1
   if errorlevel 1 set NEEDBUILD=1
 )
-if %NEEDBUILD%==1 if exist "frontend\package.json" (
-  call :packages frontend
-  if errorlevel 1 goto :buildfailed
-  echo Building the screens...
-  call npm --prefix frontend run build
-  if errorlevel 1 goto :buildfailed
-)
-goto :database
+if %NEEDBUILD%==0 goto :database
+if not exist "frontend\package.json" goto :database
+call :packages frontend
+if errorlevel 1 goto :buildfailed
+echo Building the screens...
+call npm --prefix frontend run build
+if not errorlevel 1 goto :database
+REM "npm install" does not repair a damaged library ("not a valid Win32 application", "Cannot find native binding"): start clean, once.
+echo.
+echo [!] Building failed. Installing the screen libraries again from scratch and trying once more...
+call :reinstall frontend
+if errorlevel 1 goto :buildfailed
+echo Building the screens...
+call npm --prefix frontend run build
+if not errorlevel 1 goto :database
 
 :buildfailed
 if exist "frontend\dist\index.html" (
@@ -116,6 +132,8 @@ exit /b 0
 :failed
 echo.
 echo [X] Setup failed - see the messages above.
+echo     If a library error repeats: check that antivirus is not blocking this folder, delete the node_modules
+echo     folders inside backend and frontend, and run startup.bat again ^(needs internet^).
 :stopped
 echo.
 pause
@@ -123,14 +141,10 @@ exit /b 1
 
 REM ---- Libraries of one part (%1 = backend or frontend) ----
 REM Installs what package-lock.json lists: on the first run, again after an update changed that list, and whenever a listed
-REM library is missing. A copy of the list is kept inside node_modules to remember what was installed.
+REM library is missing. A copy of the list is kept inside node_modules after a finished install. Without it this is the first run,
+REM or the last install was cut short (window closed, power cut), or node_modules was copied in: install from scratch.
 :packages
-if not exist "%~1\node_modules" (
-  echo Installing %~1 libraries ^(first run, needs internet^)...
-  call npm --prefix %~1 ci --no-audit --no-fund
-  if errorlevel 1 exit /b 1
-  goto :remember
-)
+if not exist "%~1\node_modules\.installed-lock.json" goto :reinstall
 call :complete %~1
 if errorlevel 1 goto :update
 fc /b "%~1\package-lock.json" "%~1\node_modules\.installed-lock.json" >nul 2>&1
@@ -149,6 +163,18 @@ if errorlevel 1 (
 :remember
 copy /y "%~1\package-lock.json" "%~1\node_modules\.installed-lock.json" >nul
 exit /b 0
+
+REM Removes node_modules and installs it again (%1 = backend or frontend).
+:reinstall
+echo Installing %~1 libraries ^(needs internet^)...
+call npm --prefix %~1 ci --no-audit --no-fund
+if errorlevel 1 exit /b 1
+goto :remember
+
+REM Succeeds when every library named in package.json can actually be loaded (used for the server).
+:loads
+node -e "const r=require('module').createRequire(require('path').resolve('%~1/package.json')); Object.keys(require('./%~1/package.json').dependencies).forEach(n=>r(n))" >nul 2>&1
+exit /b %errorlevel%
 
 REM Succeeds when every library named in package.json is present.
 :complete
