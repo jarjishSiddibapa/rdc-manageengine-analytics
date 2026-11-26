@@ -51,7 +51,7 @@ cmd /c '"C:\Program Files\MySQL\MySQL Server 9.5\bin\mysql.exe" -u root -p --def
 
 Double-click `C:\rdc-analytics\startup.bat`. The first run needs internet and takes a few minutes. Leave the window open and go to <http://localhost:7780>.
 
-After a restore, sign in with the same accounts as on the old PC. The email account comes across too (with `.env` and `.secret`); check it with **Admin > Connections > Send a test email**, and update **Web address** if people will open the new PC, so emailed links point to it.
+After a restore, sign in with the same accounts as on the old PC. The email account comes across too (with `.env` and `.secret`); check it with **Admin > Connections > Send a test email**. If **Web address** was set for the old PC, change or blank it, so emailed links point to the new one.
 
 | `startup.bat` says | Do this |
 |---|---|
@@ -66,13 +66,15 @@ Both PCs use the same ManageEngine access, and ManageEngine throttles heavy use.
 
 ## 7. Optional
 
-**Let other people on your network open it.** Set `HOST=0.0.0.0` in `.env`, restart, and run this in an **administrator** PowerShell:
+**Let other people on your network open it.** Set `HOST=0.0.0.0` in `.env` and restart. The startup window then shows the address to give them, for example `http://192.168.0.84:7780`, and emailed links use it by themselves (leave **Web address** blank, unless you want a name or an https address instead). Reserve the PC's address in the router so it does not change.
+
+If other PCs cannot connect, allow the port in an **administrator** PowerShell. This rule works when Windows lists the network as private or domain (**Settings > Network & internet**); mark your office network as private first if it shows as public.
 
 ```powershell
-New-NetFirewallRule -DisplayName "RDC SR Analytics" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 7780 -Profile Domain,Private
+New-NetFirewallRule -DisplayName "RDC SR Analytics" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 7780 -Profile Domain,Private -RemoteAddress LocalSubnet
 ```
 
-Then set **Admin > Settings > Identity > Web address** to `http://THAT-PC-NAME:7780` so emailed links work. The connection is not encrypted: use it only on a trusted network, or put HTTPS in front and set `TRUST_PROXY`.
+If Windows asked to allow Node.js on public networks and you agreed, the app is also reachable on any public network that PC joins. The connection is not encrypted: use it only on a trusted network, or put HTTPS in front and set `TRUST_PROXY`.
 
 **Start automatically when someone signs in to Windows:** press `Win + R`, type `shell:startup`, and place a shortcut to `startup.bat` there.
 

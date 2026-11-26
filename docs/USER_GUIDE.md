@@ -85,7 +85,7 @@ When email is set up, **Add user** offers **Email them a link to set their own p
 
 ## Forgot password
 
-When email is set up, the sign-in page offers **Forgot your password?**: the person enters their email address and receives a link (valid once, 60 minutes by default) to choose a new password; they are signed out everywhere and a notice is emailed. Set **Web address** under Admin → Settings → Identity so the link opens on the right address, and switch the feature off or tune its limits under Settings → Security → Password reset. Without email, an administrator resets passwords under Admin → Users.
+When email is set up, the sign-in page offers **Forgot your password?**: the person enters their email address and receives a link (valid once, 60 minutes by default) to choose a new password; they are signed out everywhere and a notice is emailed. When the app is shared on the network, links use the address of the PC that runs it (for example `http://192.168.0.84:7780`); set **Web address** under Admin → Settings → Identity to use a name or an https address instead, and switch the feature off or tune its limits under Settings → Security → Password reset. Without email, an administrator resets passwords under Admin → Users.
 
 ## Working on the code (and saving tokens)
 

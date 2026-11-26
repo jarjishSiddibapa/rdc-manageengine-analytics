@@ -2,7 +2,7 @@
 
 Keep this file current. It is the first thing a new session (or a person) reads to continue exactly where the last one stopped, without re-deriving anything. Update it at the end of every piece of work, before starting the next one.
 
-Last updated: 2026-11-26 (renamed to RDC ManageEngine SR Analytics; active/inactive technicians; more filters; new-PC setup; welcome email).
+Last updated: 2026-11-26 (renamed to RDC ManageEngine SR Analytics; active/inactive technicians; more filters; new-PC setup; welcome email; network-address links).
 
 ## State: all requested work is built and tested
 
@@ -19,6 +19,7 @@ Last updated: 2026-11-26 (renamed to RDC ManageEngine SR Analytics; active/inact
 | Security review (Cloudflare audit-skill classes) + dependency fixes + CI | done | docs/SECURITY.md; npm audit 0 high; reset 50/50, roles 16/16, Excel 264/264 |
 | Regression | passing | Excel suite 264/0, role suite 16/0, backup suite 64/0 (last run 2026-10-28 on a clean server) |
 | Welcome email for new users (set-password link) | done | 44/44 end-to-end checks with a local fake mail server on a throwaway database; browser check of Add user and the set-password page |
+| Emailed links use the PC's network address; app shared on this PC (HOST=0.0.0.0) | done | 10/10 checks over the LAN address with an empty throwaway database; 44/44 email checks; set-password page opened by IP |
 | Rename to RDC ManageEngine SR Analytics | done | browser check; internal identifiers unchanged |
 | Active / inactive technicians; sub-category, region, site and other filters | done | feature checks 80/0 against SQL on a throwaway copy of the database; browser check at 1366 and 375 px |
 | New-PC setup: startup.bat, docs/SETUP_NEW_PC.md | done | see CHANGELOG 2026-11-26 |
@@ -27,7 +28,7 @@ Last updated: 2026-11-26 (renamed to RDC ManageEngine SR Analytics; active/inact
 ## Needs the user (cannot be done by the assistant)
 1. Restart the app (close its window, double-click startup.bat), press Ctrl+F5, then mark inactive technicians under Technicians > Active / inactive. To move to another PC follow docs/SETUP_NEW_PC.md.
 2. Change the default administrator password after the first sign-in.
-3. Email: the sender account and server are filled in (backend\.env); after a restart, type the App password under Admin > Connections, save, then "Send a test email". Set Settings > Identity > Names > Web address (and HOST in .env) if others should open the links. The assistant does not type passwords.
+3. Email: the sender account and server are filled in (backend\.env); after a restart, type the App password under Admin > Connections, save, then "Send a test email". HOST=0.0.0.0 is set on this PC, so links use its network address after the restart. The assistant does not type passwords.
 4. Keep a copy of backend\.secret (it decrypts the saved passwords). Backups do not include it.
 5. Optional: `graphify hook install` and `graphify install --project --platform claude` (the permission system blocked the assistant from installing git/Claude hooks). Without them run `graphify update .` after code changes.
 6. The old database deloitte_sr_analytics can be dropped.
@@ -42,7 +43,7 @@ Last updated: 2026-11-26 (renamed to RDC ManageEngine SR Analytics; active/inact
 - The unsaved-changes guard on the Settings screen does not cover the browser Back button.
 - ManageEngine sets no due times, so due and overdue figures are hidden.
 - Dark mode was not built.
-- Forgot password was tested with a local fake mail server, not a real mailbox. For links to open from other PCs, set Settings > Identity > Names > Web address.
+- Forgot password was tested with a local fake mail server, not a real mailbox. Opening the app from a second device has not been tried. This PC's Wi-Fi is listed as Public and Node.js is allowed through the firewall there.
 - Not implemented (offered): workload-reminder emails from the reference app.
 - Welcome and reset emails have not yet gone through the real mailbox.
 

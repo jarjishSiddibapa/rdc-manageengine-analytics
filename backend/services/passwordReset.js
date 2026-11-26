@@ -4,6 +4,7 @@ const settings = require('./settings');
 const auth = require('./auth');
 const audit = require('./audit');
 const mailer = require('./mailer');
+const address = require('./address');
 
 // Emailed set-password links: "Forgot your password?", and the welcome email to a newly added user. The link carries a random token that works once and expires.
 // Only the SHA-256 of the token is stored, so a copy of the database cannot be used to reset anyone's password.
@@ -18,11 +19,6 @@ const hashToken = token => crypto.createHash('sha256').update(token).digest('hex
 const available = () => settings.flag('password_reset_enabled') && mailer.isConfigured();
 
 const welcomeAvailable = () => settings.flag('welcome_email_enabled') && mailer.isConfigured();
-
-function publicUrl() {
-  const configured = settings.str('public_url').replace(/\/+$/, '');
-  return configured || `http://localhost:${process.env.PORT || 7780}`;
-}
 
 // ── Limits (in memory: a restart only ever helps a person who is being limited) ──
 const perHour = new Map(); // ip -> [timestamps]
@@ -46,7 +42,8 @@ async function issue(userId, minutes, purpose, ip) {
   const token = crypto.randomBytes(32).toString('hex');
   await revoke(userId);
   await pool.query('INSERT INTO password_resets (token_hash, user_id, expires_at, ip, purpose) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE), ?, ?)', [hashToken(token), userId, minutes, ip, purpose]);
-  return { token, url: `${publicUrl()}/reset-password?token=${token}` };
+  const base = await address.appUrl();
+  return { token, base, url: `${base}/reset-password?token=${token}` };
 }
 const discard = token => pool.query('DELETE FROM password_resets WHERE token_hash = ?', [hashToken(token)]);
 
@@ -60,7 +57,7 @@ async function sendWelcome(req, user) {
   try {
     link = await issue(user.id, hours * 60, 'welcome', audit.clientIp(req) || 'unknown');
     await mailer.sendWelcomeEmail({
-      to: user.email, name: user.name, url: link.url, hours, signInUrl: publicUrl(), invitedBy: req.user?.name, canReset: available(),
+      to: user.email, name: user.name, url: link.url, hours, signInUrl: link.base, invitedBy: req.user?.name, canReset: available(),
     });
     await audit.record(req, 'welcome_email_sent', { target: user.email });
     return { sent: true, message: `Welcome email sent to ${user.email}` };
@@ -151,4 +148,4 @@ async function complete(req, token, password) {
 
 const purgeOld = () => pool.query('DELETE FROM password_resets WHERE expires_at < DATE_SUB(NOW(), INTERVAL 1 DAY)');
 
-module.exports = { available, welcomeAvailable, sendWelcome, revoke, request, lookup, complete, hourlyLimitHit, lockedFor, purgeOld, publicUrl, badToken };
+module.exports = { available, welcomeAvailable, sendWelcome, revoke, request, lookup, complete, hourlyLimitHit, lockedFor, purgeOld, badToken };

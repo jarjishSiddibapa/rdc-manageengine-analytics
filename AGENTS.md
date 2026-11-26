@@ -42,7 +42,8 @@ backend/services/
   reports.js                     Excel exports (streaming exceljs), records/dashboard/technician/SR reports
   settings.js                    settings registry (~91, schema = validation + default + Admin screen); everything configurable lives here
   connections.js / secrets.js    ManageEngine + SMTP details (DB value overrides .env), secrets AES-256-GCM, key in backend/.secret
-  passwordReset.js               forgot-password by email: hashed single-use tokens, limits, link address from the public_url setting
+  passwordReset.js               forgot-password by email: hashed single-use tokens, limits, link address from address.js
+  address.js                     address for emailed links: public_url setting, else the PC's network IP when HOST shares the app
   auth.js / audit.js             sessions, lockouts, roles; activity log
   backup.js / mailer.js          mysqldump backups (+retention, catch-up, email); SMTP mail
 backend/routes/                  auth, data (analytics/reports/sync), admin (users, audit, settings), backups

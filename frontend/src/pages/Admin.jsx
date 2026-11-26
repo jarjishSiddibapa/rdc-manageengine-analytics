@@ -17,6 +17,7 @@ import AdminConnections from './AdminConnections';
 import AdminSettings from './AdminSettings';
 import { askToLeave } from '../hooks/useUnsavedGuard';
 import { passwordHint, passwordRules, useAppConfig } from '../context/AppConfig';
+import { copyText } from '../utils/clipboard';
 
 const { Text, Paragraph } = Typography;
 const at = v => (v ? dayjs(v).format('DD-MMM-YYYY hh:mm A') : 'Never');
@@ -118,7 +119,9 @@ function UserForm({ editing, welcome, onClose, onSaved }) {
             extra={invite ? (
               <>
                 The link works once, for {welcome.hours} hours. No password is sent by email.
-                {welcome.local_only && <div className="invite-warning">No web address is set, so the link only opens on the PC that runs this app. Set it under Admin &gt; Settings &gt; Identity.</div>}
+                {welcome.local_only
+                  ? <div className="invite-warning">The link starts with {welcome.link_address}, so it only opens on the PC that runs this app. Share the app on your network (HOST=0.0.0.0 in backend\.env) or set a web address under Admin &gt; Settings &gt; Identity.</div>
+                  : <> It opens on <b>{welcome.link_address}</b>.</>}
               </>
             ) : null}
           ><Switch /></Form.Item>
@@ -147,7 +150,7 @@ function UserForm({ editing, welcome, onClose, onSaved }) {
 }
 
 async function copy(text, message) {
-  try { await navigator.clipboard.writeText(text); message.success('Copied'); } catch { message.info('Select the text and copy it'); }
+  if (await copyText(text)) message.success('Copied'); else message.info('Select the text and copy it');
 }
 
 function ResetPassword({ user, onClose }) {

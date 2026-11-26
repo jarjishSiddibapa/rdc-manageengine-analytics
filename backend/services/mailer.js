@@ -140,7 +140,6 @@ async function sendPasswordResetEmail({ to, name, url, minutes }) {
       ${greeting(name)}
       <p>Someone asked to reset the password for this account. If that was you, choose a new password with the button below. The link works once and expires in ${escapeHtml(minutes)} minutes.</p>
       <p style="margin: 22px 0;"><a href="${escapeHtml(url)}" style="background: ${BRAND}; color: #fff; text-decoration: none; padding: 12px 26px; border-radius: 6px; font-weight: 600; display: inline-block;">Choose a new password</a></p>
-      <p style="font-size: 12px; color: #5b6b80; word-break: break-all;">Or copy this address into your browser: ${escapeHtml(url)}</p>
       <p style="font-size: 13px; color: #5b6b80;">If you did not ask for this, ignore this email: your password stays as it is.</p>`),
     text: `Choose a new password for ${appName()}: ${url}\nThe link works once and expires in ${minutes} minutes. If you did not ask for this, ignore this email.`,
   });
@@ -158,7 +157,6 @@ async function sendWelcomeEmail({ to, name, url, hours, signInUrl, invitedBy, ca
       <p>${invitedBy ? `${escapeHtml(invitedBy)} has` : 'An administrator has'} created an account for you on ${escapeHtml(appName())}. You sign in with this email address: <b>${escapeHtml(to)}</b></p>
       <p>Start by choosing your password. The link works once and expires in ${escapeHtml(lasts)}.</p>
       <p style="margin: 22px 0;"><a href="${escapeHtml(url)}" style="background: ${BRAND}; color: #fff; text-decoration: none; padding: 12px 26px; border-radius: 6px; font-weight: 600; display: inline-block;">Set your password</a></p>
-      <p style="font-size: 12px; color: #5b6b80; word-break: break-all;">Or copy this address into your browser: ${escapeHtml(url)}</p>
       <p style="font-size: 13px; color: #5b6b80;">After that, sign in at <a href="${escapeHtml(signInUrl)}">${escapeHtml(signInUrl)}</a>. If the link has expired, ${escapeHtml(expired)}.</p>`),
     text: `An account was created for you on ${appName()}. You sign in with ${to}.\nSet your password: ${url}\nThe link works once and expires in ${lasts}. After that, sign in at ${signInUrl}. If the link has expired, ${expired}.`,
   });

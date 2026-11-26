@@ -15,6 +15,7 @@ const { pool } = require('./db/pool');
 const { initDb } = require('./db/database');
 const auth = require('./services/auth');
 const passwordReset = require('./services/passwordReset');
+const address = require('./services/address');
 const settings = require('./services/settings');
 const connections = require('./services/connections');
 const secrets = require('./services/secrets');
@@ -234,6 +235,8 @@ initDb({ recoverRuns: !NO_BACKGROUND })
     server.requestTimeout = 120000;
     server.headersTimeout = 30000;
     console.log(`RDC ManageEngine SR Analytics running on http://localhost:${PORT}${NO_BACKGROUND ? ' (background sync disabled)' : ''}`);
+    // The address to give other people, when the app is shared on the network.
+    address.appUrl().then(url => { if (!address.onlyThisPc(url)) console.log(`Other computers open it on ${url}`); }).catch(() => {});
     if (!NO_BACKGROUND) {
       sync.startScheduler();
       backup.init().catch(error => console.error('Backup schedule could not start:', error.message));

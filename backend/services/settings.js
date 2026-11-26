@@ -163,7 +163,7 @@ const SCHEMA = [
   text('app_name', 'Names', 'Application name', 'RDC ManageEngine SR Analytics', 60, 'Shown in the sidebar, the sign-in page, the browser tab, emails and Excel files.', { required: true }),
   text('org_name', 'Names', 'Organisation name', '', 80, 'Optional. Shown under the application name on the sign-in page.'),
   text('public_url', 'Names', 'Web address people use to open this app', '', 200,
-    'Used for the links in welcome and password-reset emails, for example http://servername:7780 or https://analytics.yourcompany.com. Blank uses http://localhost and the port, which only works on the PC that runs the app. It is never taken from the browser, so a forged request cannot point the link elsewhere.'),
+    'Used for the links in welcome and password-reset emails, for example http://servername:7780 or https://analytics.yourcompany.com. Leave it blank to use the network address of the PC that runs the app (for example http://192.168.0.84:7780) when the app is shared on the network with HOST=0.0.0.0 in backend\\.env; otherwise links use localhost and only open on that PC. It is never taken from the browser, so a forged request cannot point the link elsewhere.'),
   text('sidebar_subtitle', 'Names', 'Sidebar subtitle', 'Service desk', 40, ''),
   text('login_subtitle', 'Sign-in page', 'Sign-in page subtitle', 'Service desk performance', 60, ''),
   text('login_headline', 'Sign-in page', 'Sign-in page headline', 'See how every technician is really performing.', 120, ''),

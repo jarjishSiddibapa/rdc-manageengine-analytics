@@ -6,6 +6,7 @@ const audit = require('../services/audit');
 const settings = require('../services/settings');
 const mailer = require('../services/mailer');
 const passwordReset = require('../services/passwordReset');
+const address = require('../services/address');
 
 const router = express.Router();
 router.use(auth.requireRole('admin'));
@@ -60,13 +61,14 @@ router.get('/users', async (_req, res) => {
   const [rows] = await pool.query(`
     SELECT ${USER_FIELDS.split(', ').map(f => `u.${f}`).join(', ')}, (SELECT COUNT(*) FROM sessions s WHERE s.user_id = u.id AND s.expires_at > NOW()) AS active_sessions
     FROM users u ORDER BY u.active DESC, u.name`);
-  res.json({ users: rows.map(u => ({ ...auth.publicUser(u), active_sessions: u.active_sessions })), roles: auth.ROLES, welcome: welcomeStatus() });
+  res.json({ users: rows.map(u => ({ ...auth.publicUser(u), active_sessions: u.active_sessions })), roles: auth.ROLES, welcome: await welcomeStatus() });
 });
 
 // Whether a welcome email can be sent, and what the "Add a user" screen should say about it.
-function welcomeStatus() {
+async function welcomeStatus() {
+  const link = await address.appUrl();
   const blocked = !settings.flag('welcome_email_enabled') ? 'off' : !mailer.isConfigured() ? 'no_email' : null;
-  return { available: !blocked, blocked, hours: settings.num('welcome_link_hours'), local_only: !settings.str('public_url') };
+  return { available: !blocked, blocked, hours: settings.num('welcome_link_hours'), link_address: link, local_only: address.onlyThisPc(link) };
 }
 
 router.post('/users', async (req, res) => {

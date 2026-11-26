@@ -36,7 +36,8 @@ This replaces the whole `manageengine_analytics` database with the backup's stat
 
 ## Forgot password (by email)
 - The sign-in page shows **Forgot your password?** when it is switched on (Admin > Settings > Security > Password reset) **and** email is set up (Admin > Connections). People enter their address and get a link that works once and expires (default 60 minutes). Choosing a new password signs them out everywhere and a notice goes to their mailbox. Every step is in the Activity log.
-- The link points to the **web address** under Admin > Settings > Identity > Names. Leave it blank and the link is `http://localhost:7780/...`, which only opens on the PC that runs the app; set it to the address people really use (for example `http://servername:7780`). It is never taken from the browser, so a forged request cannot point the email elsewhere.
+- Which address the link uses: the **web address** under Admin > Settings > Identity > Names if one is set. If it is blank and the app is shared on the network (`HOST=0.0.0.0` in `backend.env`), the network address of the PC that runs it, for example `http://192.168.0.84:7780`, found at the moment of sending (virtual-machine and VPN adapters are passed over). Otherwise `http://localhost:7780`, which only opens on that PC. It is never taken from the browser, so a forged request cannot point the email elsewhere. The startup window prints the address to give others.
+- A router may give the PC a new address later, and links already sent then stop opening. Reserve the address in the router (DHCP reservation), or set a web address with the PC's name.
 - The page always answers the same ("if that address belongs to an account..."), so nobody can find out who has an account. Disabled accounts and unknown addresses get no email. Limits: one email per address per 2 minutes, 10 requests per hour per computer; wrong links pause that computer like wrong passwords do (same Settings).
 - If email is not set up, or the feature is off, the link is hidden and an administrator resets passwords under Admin > Users.
 
@@ -54,7 +55,8 @@ This replaces the whole `manageengine_analytics` database with the backup's stat
 | Reset email never arrives | check the spam folder; Admin > Activity log shows "Asked for a password reset link" with the reason (no email sent / could not be sent) |
 | No "email them a link" switch under Add user | email is not set up, or Welcome email is off (Settings > Security) |
 | Welcome email failed | the screen and Admin > Activity give the mail server's reason; fix it, then **Send welcome email** |
-| Reset or welcome link opens "localhost" and fails on another PC | set the web address under Settings > Identity > Names |
+| Reset or welcome link opens "localhost" and fails on another PC | set `HOST=0.0.0.0` in `backend.env` and restart, or set the web address under Settings > Identity > Names |
+| Other PCs cannot open the address | the app is not restarted since `HOST` changed, the PCs are on another network, or Windows Firewall blocks it (see SETUP_NEW_PC.md, section 7) |
 
 ## Security checklist
 Change the default administrator password after the first sign-in. Keep `HOST=127.0.0.1` unless you want to share the app, and then put it behind HTTPS. Treat `backend\db-backup` and backup emails as sensitive.

@@ -13,6 +13,7 @@ import { useFilters } from './Filters';
 import { ANT_STATUS_TAG } from '../theme';
 import { formatDuration } from '../utils/duration';
 import '../styles/analytics.css';
+import { copyText } from '../utils/clipboard';
 
 const Context = createContext(() => {});
 const dash = v => (v === null || v === undefined || v === '' ? '-' : v);
@@ -96,20 +97,6 @@ function Timeline({ events }) {
       </ol>
     </div>
   );
-}
-
-async function copyText(text) {
-  try { await navigator.clipboard.writeText(text); return true; } catch {
-    const area = document.createElement('textarea');
-    area.value = text;
-    area.style.cssText = 'position:fixed;opacity:0';
-    document.body.appendChild(area);
-    area.select();
-    let ok = false;
-    try { ok = document.execCommand('copy'); } catch { ok = false; }
-    area.remove();
-    return ok;
-  }
 }
 
 const SRViewerModal = memo(function SRViewerModal({ state, onClose, onRetry }) {
