@@ -28,7 +28,7 @@ Last updated: 2026-11-26 (renamed to RDC ManageEngine SR Analytics; active/inact
 ## Needs the user (cannot be done by the assistant)
 1. The app was restarted on 2026-11-26 (new code is live). Press Ctrl+F5, then mark inactive technicians under Technicians > Active / inactive. To move to another PC follow docs/SETUP_NEW_PC.md.
 2. Change the default administrator password after the first sign-in.
-3. Email: the sender account and server are filled in (backend\.env), but no password is saved yet, so "Forgot your password?" and welcome emails are off. Type the App password under Admin > Connections > Email (SMTP) and press Save; no restart needed. A sample welcome mail the user asked for is to be sent after that. HOST=0.0.0.0 is set on this PC, so links use its network address. The assistant does not type passwords.
+3. Email is set up on this PC (2026-11-26): "Forgot your password?" and welcome emails are on, and the mail server accepted a sample welcome mail. Check that it reached the inbox. HOST=0.0.0.0 is set on this PC, so links use its network address. If the App password was ever shared in a chat or message, replace it under Admin > Connections. The assistant does not type passwords.
 4. Keep a copy of backend\.secret (it decrypts the saved passwords). Backups do not include it.
 5. Optional: `graphify hook install` and `graphify install --project --platform claude` (the permission system blocked the assistant from installing git/Claude hooks). Without them run `graphify update .` after code changes.
 6. The old database deloitte_sr_analytics can be dropped.
@@ -38,14 +38,14 @@ Last updated: 2026-11-26 (renamed to RDC ManageEngine SR Analytics; active/inact
 - The older suites (Excel 264, roles 16, reset 50, backup 64) lived in a temporary folder that has since been cleared; they were not re-run for the 2026-11-26 changes. Write new ones into the repository when the next big change comes.
 - Region comes from site names; sites such as "Head Office", "Base Site", "Robo-..." and "Ultrafine - ..." form their own regions unless added to the region rules.
 - Not tested on a real touch device: pinch zoom on charts. Not tested: the download buttons on the newest heatmap and scatter charts.
-- Email was tested against a local fake mail server only, not a real mailbox.
+- Real mailbox: one sample welcome mail was accepted by the mail server. Emailed backups have only been tested against a local fake mail server.
 - About 58 SRs removed from ManageEngine are not flagged until the next Deep Sync (the 01:00 daily one does it). A few hundred SR histories affected by earlier parsing bugs are re-read when ManageEngine reports a change; they were not force re-queued.
 - The unsaved-changes guard on the Settings screen does not cover the browser Back button.
 - ManageEngine sets no due times, so due and overdue figures are hidden.
 - Dark mode was not built.
-- Forgot password was tested with a local fake mail server, not a real mailbox. Opening the app from a second device has not been tried. This PC's Wi-Fi is listed as Public and Node.js is allowed through the firewall there.
+- Forgot password was tested with a local fake mail server; a reset mail has not been sent through the real mailbox yet. Opening the app from a second device has not been tried. This PC's Wi-Fi is listed as Public and Node.js is allowed through the firewall there.
 - Not implemented (offered): workload-reminder emails from the reference app.
-- Welcome and reset emails have not yet gone through the real mailbox.
+- A welcome link for a real new user has not been used end to end through the real mailbox (the sample's button is a dummy).
 
 ## How to continue (token-saving)
 1. `graphify query "<question>"` before reading code; docs/ARCHITECTURE.md, OPERATIONS.md and CONFIGURATION.md for behaviour and settings.
