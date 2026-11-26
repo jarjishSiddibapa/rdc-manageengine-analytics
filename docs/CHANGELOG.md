@@ -3,6 +3,7 @@
 Newest first. One line per change that matters to a person using or maintaining the app.
 
 ## 2026-11-26
+- **Forgot password appears as soon as email is set up**: saving the account under Admin > Connections now updates the sign-in page without a reload, and the Email section says it is needed for that link and for welcome emails.
 - **Emailed links use the PC's network address** (for example http://192.168.0.84:7780) when the app is shared with HOST=0.0.0.0 and no web address is set; the startup window prints it and Add user shows it. Copy buttons work over a network address too. The "copy this address" line was removed from the welcome and reset emails.
 - **Welcome email**: adding a user can email them a one-time link to set their own password (no password is sent), with **Send welcome email** for a fresh link before first sign-in. Settings `welcome_email_enabled`, `welcome_link_hours`; column `password_resets.purpose` (added at start). Emailed links are now cancelled when an administrator changes the address, disables the account or resets the password.
 - **Renamed** to RDC ManageEngine SR Analytics (screens, tab, emails, Excel files, startup window). Internal names (database, backup file names, request header) are unchanged, so existing data and backups keep working.

@@ -3,6 +3,7 @@ import { Alert, App as AntApp, Button, Input, Select, Skeleton, Tag } from 'antd
 import { ApiOutlined, CheckCircleFilled, CloseCircleFilled, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { adminAPI } from '../services/api';
 import { useAuth } from '../context/Auth';
+import { useAppConfig } from '../context/AppConfig';
 import useLoad from '../hooks/useLoad';
 import useUnsavedGuard from '../hooks/useUnsavedGuard';
 import { ErrorState } from '../components/ui/ErrorState';
@@ -101,6 +102,7 @@ function Result({ result }) {
 export default function AdminConnections({ onDirty }) {
   const { message } = AntApp.useApp();
   const { user } = useAuth();
+  const { refresh: refreshConfig } = useAppConfig();
   const { data, loading, error, reload } = useLoad(() => adminAPI.connections(), []);
   const [drafts, setDrafts] = useState({});
   const [secrets, setSecrets] = useState({});
@@ -148,6 +150,8 @@ export default function AdminConnections({ onDirty }) {
       message.success(`${label} saved. It is used from now on - no restart needed.`);
       setResults(r => ({ ...r, [group]: null }));
       reload();
+      // Saving the email account switches "Forgot your password?" on or off on the sign-in page.
+      refreshConfig();
     } catch (e) {
       const field = e.response?.data?.field;
       if (field) setErrors({ [field]: e.message });
@@ -191,7 +195,7 @@ export default function AdminConnections({ onDirty }) {
 
       <Card
         kind="smtp" title="Email (SMTP)" icon={<MailOutlined />} fields={of('smtp')} {...common}
-        intro="Used for emailed database backups, failure alerts and test messages. Optional." saving={saving === 'smtp'} onSave={() => save('smtp', 'Email settings')}
+        intro="Needed for “Forgot your password?” on the sign-in page and for welcome emails to new users. Also sends emailed backups, failure alerts and test messages." saving={saving === 'smtp'} onSave={() => save('smtp', 'Email settings')}
       >
         <Button onClick={() => test('smtp')} loading={testing === 'smtp'}>Test connection</Button>
         <Input value={mailTo} onChange={e => setMailTo(e.target.value)} placeholder="send the test to..." aria-label="Send a test email to" style={{ width: 240, maxWidth: '100%' }} inputMode="email" />

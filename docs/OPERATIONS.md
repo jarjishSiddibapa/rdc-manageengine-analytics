@@ -51,7 +51,7 @@ This replaces the whole `manageengine_analytics` database with the backup's stat
 | Backup fails: mysqldump not found | install MySQL tools or set `MYSQLDUMP_PATH` |
 | Backup email "Not sent" | SMTP details wrong, or the provider blocks the sign-in (Gmail needs an app password) |
 | Locked out of sign-in | wait 15 minutes, or another administrator resets the password |
-| "Forgot your password?" missing | email is not set up (Admin > Connections) or the feature is off (Settings > Security) |
+| "Forgot your password?" missing | email is not set up (Admin > Connections needs the user name **and** a saved password) or the feature is off (Settings > Security) |
 | Reset email never arrives | check the spam folder; Admin > Activity log shows "Asked for a password reset link" with the reason (no email sent / could not be sent) |
 | No "email them a link" switch under Add user | email is not set up, or Welcome email is off (Settings > Security) |
 | Welcome email failed | the screen and Admin > Activity give the mail server's reason; fix it, then **Send welcome email** |

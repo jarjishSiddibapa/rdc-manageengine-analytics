@@ -2,7 +2,7 @@
 
 Keep this file current. It is the first thing a new session (or a person) reads to continue exactly where the last one stopped, without re-deriving anything. Update it at the end of every piece of work, before starting the next one.
 
-Last updated: 2026-11-26 (renamed to RDC ManageEngine SR Analytics; active/inactive technicians; more filters; new-PC setup; welcome email; network-address links).
+Last updated: 2026-11-26 (renamed to RDC ManageEngine SR Analytics; active/inactive technicians; more filters; new-PC setup; welcome email; network-address links; forgot-password link shows right after email setup).
 
 ## State: all requested work is built and tested
 
@@ -26,9 +26,9 @@ Last updated: 2026-11-26 (renamed to RDC ManageEngine SR Analytics; active/inact
 | Browser check (desktop and 375 px): Backups, Settings, Connections, dashboard | done | no horizontal overflow, console clean apart from the expected pre-sign-in 401 |
 
 ## Needs the user (cannot be done by the assistant)
-1. Restart the app (close its window, double-click startup.bat), press Ctrl+F5, then mark inactive technicians under Technicians > Active / inactive. To move to another PC follow docs/SETUP_NEW_PC.md.
+1. The app was restarted on 2026-11-26 (new code is live). Press Ctrl+F5, then mark inactive technicians under Technicians > Active / inactive. To move to another PC follow docs/SETUP_NEW_PC.md.
 2. Change the default administrator password after the first sign-in.
-3. Email: the sender account and server are filled in (backend\.env); after a restart, type the App password under Admin > Connections, save, then "Send a test email". HOST=0.0.0.0 is set on this PC, so links use its network address after the restart. The assistant does not type passwords.
+3. Email: the sender account and server are filled in (backend\.env), but no password is saved yet, so "Forgot your password?" and welcome emails are off. Type the App password under Admin > Connections > Email (SMTP) and press Save; no restart needed. A sample welcome mail the user asked for is to be sent after that. HOST=0.0.0.0 is set on this PC, so links use its network address. The assistant does not type passwords.
 4. Keep a copy of backend\.secret (it decrypts the saved passwords). Backups do not include it.
 5. Optional: `graphify hook install` and `graphify install --project --platform claude` (the permission system blocked the assistant from installing git/Claude hooks). Without them run `graphify update .` after code changes.
 6. The old database deloitte_sr_analytics can be dropped.
