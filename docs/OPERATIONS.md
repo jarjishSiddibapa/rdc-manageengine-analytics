@@ -3,6 +3,7 @@
 ## Start and stop
 - Start: double-click `startup.bat` (installs packages and builds the screens on first run). Open http://localhost:7780 and keep the window open.
 - Stop: close the window (or Ctrl+C). The app shuts down cleanly.
+- Another PC: follow `SETUP_NEW_PC.md`. Update a copy with `git pull`, then `startup.bat`.
 - Only one copy should run per database. A second copy for testing: set `PORT` to a spare port and `NO_BACKGROUND=1` so it does not start syncs or backups.
 
 ## Settings you must provide (`backend/.env`, see `backend/.env.example`)

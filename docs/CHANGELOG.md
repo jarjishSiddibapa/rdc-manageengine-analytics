@@ -2,6 +2,13 @@
 
 Newest first. One line per change that matters to a person using or maintaining the app.
 
+## 2026-11-26
+- **Renamed** to RDC ManageEngine SR Analytics (screens, tab, emails, Excel files, startup window). Internal names (database, backup file names, request header) are unchanged, so existing data and backups keep working.
+- **Active and inactive technicians**: Technicians > Active / inactive (administrators and managers, many at once) or the switch on a profile; an Active only | All technicians switch filters dashboards, lists and Excel files. New table `inactive_technicians`, setting `default_technician_scope`.
+- **Filters**: added sub-category, region, site, department, mode and requester; main filters on the bar, the rest under More filters; sub-category follows category and site follows region; region rules are a setting. Fixed: a long multi-selection (over 300 characters) was silently cut off by the server.
+- **startup.bat**: stricter Node.js check, reinstalls libraries after an update changed them, creates a missing `.env` and opens it. `.gitattributes` keeps its Windows line endings. New guide `docs/SETUP_NEW_PC.md`.
+- Phone layout: removed an empty gap under the filters and tidied the Technicians top card.
+
 ## 2026-11-04
 - **Security review** using the attack classes of Cloudflare's security-audit-skill (details and accepted risks: `docs/SECURITY.md`). The secure-cookie flag no longer believes a client-sent X-Forwarded-Proto (set TRUST_PROXY behind an HTTPS proxy). `nodemailer` 9 to 10.3.1 and `compression` to 1.8.2 close all high advisories (9 moderate remain, all inside exceljs). New CI workflow (syntax check, build, npm audit).
 - **UI polish** guided by the Hallmark design skill's floor checks: section and group labels are sentence case instead of tracked capitals, the amber glow on the sign-in art is gone, donut-list rows get a visible keyboard focus ring, small chart and info buttons get finger-sized hit areas on touch screens, smallest text raised to 11 px. Forgot-password suite 50/50, roles 16/16, Excel 264/264 re-run after the changes.

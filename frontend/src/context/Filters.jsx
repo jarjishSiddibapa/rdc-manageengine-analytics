@@ -6,9 +6,34 @@ import { useAuth } from './Auth';
 
 const FiltersContext = createContext(null);
 
-export const DEFAULT_FILTERS = {
-  preset: 'all', range: null, technicians: [], categories: [], priorities: [], groups: [], requestTypes: [], statuses: [],
-};
+// Every list filter, in the order shown. `field`: where the choice is kept (and the list of options in the app's metadata, unless
+// `facet` says otherwise); `url` / `api`: its name in the address and in requests; `main`: always on the filter bar (the rest sit
+// under "More filters"); `parent`: the filter that narrows this one's options.
+export const FILTER_FIELDS = [
+  { field: 'technicians', url: 'technician', api: 'technician', label: 'Technician', all: 'All technicians', main: true },
+  { field: 'categories', url: 'category', api: 'category', label: 'Category', all: 'All categories', main: true },
+  { field: 'subcategories', url: 'subcategory', api: 'subcategory', label: 'Sub-category', all: 'All sub-categories', main: true, parent: 'categories' },
+  { field: 'regions', url: 'region', api: 'region', label: 'Region', all: 'All regions', main: true },
+  { field: 'sites', url: 'site', api: 'site', label: 'Site', all: 'All sites', main: true, parent: 'regions' },
+  { field: 'priorities', url: 'priority', api: 'priority', label: 'Priority', all: 'All priorities' },
+  { field: 'statuses', url: 'status', api: 'status', label: 'Status', all: 'Any status' },
+  { field: 'requestTypes', facet: 'request_types', url: 'type', api: 'request_type', label: 'Request type', all: 'All request types', short: 'type' },
+  { field: 'groups', url: 'group', api: 'group', label: 'Group', all: 'All groups' },
+  { field: 'departments', url: 'department', api: 'department', label: 'Department', all: 'All departments' },
+  { field: 'modes', url: 'mode', api: 'mode', label: 'Mode', all: 'All modes' },
+  { field: 'requesters', url: 'requester', api: 'requester', label: 'Requester', all: 'All requesters' },
+];
+
+export const DEFAULT_FILTERS = { preset: 'all', range: null, ...Object.fromEntries(FILTER_FIELDS.map(f => [f.field, []])) };
+
+// The choices a filter offers now: what occurs in the data, narrowed by the filter it depends on.
+export function filterOptions(def, facets, filters) {
+  const list = facets?.[def.facet || def.field] || [];
+  const picked = def.parent ? new Set((filters[def.parent] || []).map(v => v.toLowerCase())) : null;
+  return list
+    .filter(item => !picked?.size || item.within?.some(v => picked.has(v.toLowerCase())))
+    .map(item => (typeof item === 'string' ? item : item.value));
+}
 
 export const PRESETS = [
   { label: 'All time', value: 'all' },
@@ -22,6 +47,12 @@ export const PRESETS = [
 export const AGGREGATIONS = [
   { value: 'average', label: 'Average', long: 'average (mean)' },
   { value: 'median', label: 'Median', long: 'median (the typical SR)' },
+];
+
+// Whether technicians marked inactive (Technicians page) are counted.
+export const TECH_SCOPES = [
+  { value: 'active', label: 'Active only', long: 'active technicians only' },
+  { value: 'all', label: 'All technicians', long: 'all technicians, including inactive' },
 ];
 
 export const BASES = [
@@ -43,12 +74,12 @@ const store = {
 try { localStorage.removeItem('mea.basis'); } catch { /* nothing saved to clear */ }
 
 // The filters travel in the address (so a view can be bookmarked or sent to a colleague) and are remembered between visits.
-const LISTS = [['technicians', 'technician'], ['categories', 'category'], ['priorities', 'priority'], ['groups', 'group'], ['requestTypes', 'type'], ['statuses', 'status']];
-const KEYS = ['preset', 'from', 'to', 'basis', 'agg', ...LISTS.map(([, k]) => k)];
+const LISTS = FILTER_FIELDS.map(f => [f.field, f.url]);
+const KEYS = ['preset', 'from', 'to', 'basis', 'agg', 'techs', ...LISTS.map(([, k]) => k)];
 const VALID_PRESETS = new Set(PRESETS.map(p => p.value));
 
 // Rewrites only the keys the filters own and leaves every other query key (table page, sort, search, SR-list switches) as the pages set it.
-function toSearch(filters, basis, defaultBasis, agg, defaultAgg, currentSearch = '') {
+function toSearch(filters, { basis, defaultBasis, agg, defaultAgg, techScope, defaultScope }, currentSearch = '') {
   const q = new URLSearchParams(currentSearch);
   KEYS.forEach(k => q.delete(k));
   if (filters.preset !== 'all') q.set('preset', filters.preset);
@@ -59,6 +90,7 @@ function toSearch(filters, basis, defaultBasis, agg, defaultAgg, currentSearch =
   for (const [field, key] of LISTS) filters[field].forEach(v => q.append(key, v));
   if (basis !== defaultBasis) q.set('basis', basis);
   if (agg !== defaultAgg) q.set('agg', agg);
+  if (techScope !== defaultScope) q.set('techs', techScope);
   const text = q.toString();
   return text ? `?${text}` : '';
 }
@@ -77,7 +109,13 @@ function fromSearch(search) {
   for (const [field, key] of LISTS) filters[field] = q.getAll(key).filter(Boolean);
   const basis = q.get('basis');
   const agg = q.get('agg');
-  return { filters, basis: basis === 'raised' || basis === 'assigned' ? basis : null, agg: agg === 'median' || agg === 'average' ? agg : null };
+  const techs = q.get('techs');
+  return {
+    filters,
+    basis: basis === 'raised' || basis === 'assigned' ? basis : null,
+    agg: agg === 'median' || agg === 'average' ? agg : null,
+    techScope: techs === 'active' || techs === 'all' ? techs : null,
+  };
 }
 
 // Only a period the person picked themselves (or a link that carries one) counts as their choice; what the app saved on its own does not.
@@ -135,7 +173,7 @@ export function FiltersProvider({ children }) {
   const initial = useRef(null);
   if (initial.current === null) {
     const fromUrl = isAnalytic(location.pathname) ? fromSearch(location.search) : null;
-    initial.current = { filters: fromUrl?.filters || readSaved() || DEFAULT_FILTERS, basis: fromUrl?.basis || null, agg: fromUrl?.agg || null };
+    initial.current = { filters: fromUrl?.filters || readSaved() || DEFAULT_FILTERS, basis: fromUrl?.basis || null, agg: fromUrl?.agg || null, techScope: fromUrl?.techScope || null };
   }
 
   // `filters` is what the controls show; `applied` follows it after a short pause, so ticking several options in a row
@@ -144,6 +182,7 @@ export function FiltersProvider({ children }) {
   const [applied, setApplied] = useState(initial.current.filters);
   const [basis, setBasisState] = useState(initial.current.basis || 'assigned');
   const [agg, setAggState] = useState(initial.current.agg || 'average');
+  const [techScope, setTechScopeState] = useState(initial.current.techScope || 'active');
   const [meta, setMeta] = useState(null);
   // A visitor with no choice of their own (nothing in the address, nothing remembered) starts with the administrator's default period.
   const presetChosen = useRef(!!(fromSearchHasKeys(location.search) || savedExists()));
@@ -153,6 +192,7 @@ export function FiltersProvider({ children }) {
   const timer = useRef(null);
   const basisChosen = useRef(!!initial.current.basis);
   const aggChosen = useRef(!!initial.current.agg);
+  const scopeChosen = useRef(!!initial.current.techScope);
 
   const setFilters = useCallback((next, immediate = false) => {
     presetChosen.current = true;
@@ -170,6 +210,7 @@ export function FiltersProvider({ children }) {
       setMetaError(null);
       if (!basisChosen.current) setBasisState(res.data.default_basis || 'assigned');
       if (!aggChosen.current) setAggState(res.data.default_aggregation || 'average');
+      if (!scopeChosen.current) setTechScopeState(res.data.default_technician_scope || 'active');
       const wanted = res.data.ui?.default_preset;
       if (!presetChosen.current && wanted && VALID_PRESETS.has(wanted) && wanted !== 'custom') {
         presetChosen.current = true;
@@ -183,52 +224,48 @@ export function FiltersProvider({ children }) {
 
   const setBasis = useCallback(value => { basisChosen.current = true; setBasisState(value); }, []);
   const setAgg = useCallback(value => { aggChosen.current = true; setAggState(value); }, []);
+  const setTechScope = useCallback(value => { scopeChosen.current = true; setTechScopeState(value); }, []);
   const bumpData = useCallback(() => setDataVersion(v => v + 1), []);
   const reset = useCallback(() => setFilters(DEFAULT_FILTERS, true), [setFilters]);
 
   // Keep the address and the saved copy in step with the filters on the analytics pages.
   const defaultBasis = meta?.default_basis || 'assigned';
   const defaultAgg = meta?.default_aggregation || 'average';
+  const defaultScope = meta?.default_technician_scope || 'active';
+  const inactiveCount = meta?.facets?.inactive_technicians || 0;
   const search = location.search;
   const path = location.pathname;
   useEffect(() => {
     writeSaved(applied);
     if (!isAnalytic(path)) return;
-    const wanted = toSearch(applied, basis, defaultBasis, agg, defaultAgg, search);
+    const wanted = toSearch(applied, { basis, defaultBasis, agg, defaultAgg, techScope, defaultScope }, search);
     if (wanted !== search) navigate({ pathname: path, search: wanted }, { replace: true, state: location.state });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [applied, basis, defaultBasis, agg, defaultAgg, path, search]);
+  }, [applied, basis, defaultBasis, agg, defaultAgg, techScope, defaultScope, path, search]);
 
   // Query-string parameters for the API. `withTechnicians: false` for the technician profile, which picks its own technician.
   const buildParams = useCallback((withTechnicians = true) => {
-    const params = { basis, ...dateRange(applied) };
-    if (withTechnicians && applied.technicians.length) params.technician = joinList(applied.technicians);
-    if (applied.categories.length) params.category = joinList(applied.categories);
-    if (applied.priorities.length) params.priority = joinList(applied.priorities);
-    if (applied.groups.length) params.group = joinList(applied.groups);
-    if (applied.requestTypes.length) params.request_type = joinList(applied.requestTypes);
-    if (applied.statuses.length) params.status = joinList(applied.statuses);
+    const params = { basis, techs: techScope, ...dateRange(applied) };
+    for (const f of FILTER_FIELDS) {
+      if (applied[f.field].length && (withTechnicians || f.field !== 'technicians')) params[f.api] = joinList(applied[f.field]);
+    }
     return params;
-  }, [applied, basis]);
+  }, [applied, basis, techScope]);
 
   // The filters in words, for the footer of a downloaded picture and the second line of an Excel file.
   const describe = useCallback((withTechnicians = true) => {
     const p = buildParams(withTechnicians);
     const parts = [BASES.find(b => b.value === basis).long];
     if (p.from || p.to) parts.push(`closed ${p.from ? `from ${dayjs(p.from).format('DD-MMM-YYYY')}` : ''}${p.to ? ` to ${dayjs(p.to).format('DD-MMM-YYYY')}` : ''}`.trim());
-    if (p.technician) parts.push(`technician: ${p.technician.split('||').join(', ')}`);
-    if (p.category) parts.push(`category: ${p.category.split('||').join(', ')}`);
-    if (p.priority) parts.push(`priority: ${p.priority.split('||').join(', ')}`);
-    if (p.group) parts.push(`group: ${p.group.split('||').join(', ')}`);
-    if (p.request_type) parts.push(`type: ${p.request_type.split('||').join(', ')}`);
-    if (p.status) parts.push(`status: ${p.status.split('||').join(', ')}`);
+    if (!p.technician && inactiveCount && withTechnicians) parts.push(TECH_SCOPES.find(t => t.value === p.techs).long);
+    for (const f of FILTER_FIELDS) if (p[f.api]) parts.push(`${f.short || f.label.toLowerCase()}: ${p[f.api].split('||').join(', ')}`);
     return parts.join(' | ');
-  }, [buildParams, basis]);
+  }, [buildParams, basis, inactiveCount]);
 
   const value = useMemo(() => ({
-    filters, applied, setFilters, reset, basis, setBasis, agg, setAgg, meta, metaError, buildParams, describe, dataVersion, bumpData, reloadMeta: loadMeta,
+    filters, applied, setFilters, reset, basis, setBasis, agg, setAgg, techScope, setTechScope, meta, metaError, buildParams, describe, dataVersion, bumpData, reloadMeta: loadMeta,
     settling: filters !== applied,
-  }), [filters, applied, setFilters, reset, basis, setBasis, agg, setAgg, meta, metaError, buildParams, describe, dataVersion, bumpData, loadMeta]);
+  }), [filters, applied, setFilters, reset, basis, setBasis, agg, setAgg, techScope, setTechScope, meta, metaError, buildParams, describe, dataVersion, bumpData, loadMeta]);
 
   return <FiltersContext.Provider value={value}>{children}</FiltersContext.Provider>;
 }

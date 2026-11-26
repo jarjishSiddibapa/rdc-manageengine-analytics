@@ -2,7 +2,7 @@
 
 Keep this file current. It is the first thing a new session (or a person) reads to continue exactly where the last one stopped, without re-deriving anything. Update it at the end of every piece of work, before starting the next one.
 
-Last updated: 2026-10-28 (Average/Median switch, flicker and layout fixes added).
+Last updated: 2026-11-26 (renamed to RDC ManageEngine SR Analytics; active/inactive technicians; more filters; new-PC setup).
 
 ## State: all requested work is built and tested
 
@@ -18,10 +18,13 @@ Last updated: 2026-10-28 (Average/Median switch, flicker and layout fixes added)
 | Average / Median switch (default Average), flicker fix, layout tested 320-1920 px | done | Excel 264/0, roles 16/0, browser probe on every page at 320, 375, 820, 1024, 1365, 1920 px |
 | Security review (Cloudflare audit-skill classes) + dependency fixes + CI | done | docs/SECURITY.md; npm audit 0 high; reset 50/50, roles 16/16, Excel 264/264 |
 | Regression | passing | Excel suite 264/0, role suite 16/0, backup suite 64/0 (last run 2026-10-28 on a clean server) |
+| Rename to RDC ManageEngine SR Analytics | done | browser check; internal identifiers unchanged |
+| Active / inactive technicians; sub-category, region, site and other filters | done | feature checks 80/0 against SQL on a throwaway copy of the database; browser check at 1366 and 375 px |
+| New-PC setup: startup.bat, docs/SETUP_NEW_PC.md | done | see CHANGELOG 2026-11-26 |
 | Browser check (desktop and 375 px): Backups, Settings, Connections, dashboard | done | no horizontal overflow, console clean apart from the expected pre-sign-in 401 |
 
 ## Needs the user (cannot be done by the assistant)
-1. Close any old "Deloitte" copy on port 7780, then double-click startup.bat.
+1. Restart the app (close its window, double-click startup.bat), press Ctrl+F5, then mark inactive technicians under Technicians > Active / inactive. To move to another PC follow docs/SETUP_NEW_PC.md.
 2. Change the default administrator password after the first sign-in.
 3. Email: enter the mail account under Admin > Connections (Gmail needs an App password), then "Send a test email". The reference app's credentials were not copied.
 4. Keep a copy of backend\.secret (it decrypts the saved passwords). Backups do not include it.
@@ -29,6 +32,9 @@ Last updated: 2026-10-28 (Average/Median switch, flicker and layout fixes added)
 6. The old database deloitte_sr_analytics can be dropped.
 
 ## Known gaps (honest list)
+- README screenshots still show the old name and the old filter bar.
+- The older suites (Excel 264, roles 16, reset 50, backup 64) lived in a temporary folder that has since been cleared; they were not re-run for the 2026-11-26 changes. Write new ones into the repository when the next big change comes.
+- Region comes from site names; sites such as "Head Office", "Base Site", "Robo-..." and "Ultrafine - ..." form their own regions unless added to the region rules.
 - Not tested on a real touch device: pinch zoom on charts. Not tested: the download buttons on the newest heatmap and scatter charts.
 - Email was tested against a local fake mail server only, not a real mailbox.
 - About 58 SRs removed from ManageEngine are not flagged until the next Deep Sync (the 01:00 daily one does it). A few hundred SR histories affected by earlier parsing bugs are re-read when ManageEngine reports a change; they were not force re-queued.

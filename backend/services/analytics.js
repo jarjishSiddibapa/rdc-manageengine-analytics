@@ -12,6 +12,43 @@ const settings = require('./settings');
 const MINUTE_MS = 60 * 1000;
 const DAY_MINUTES = 24 * 60;
 const BASES = ['assigned', 'raised'];
+const TECH_SCOPES = ['active', 'all'];
+
+// Every list filter: its name in a request (`param`), in the parsed filters (`key`) and on a record (`field`), what a report calls
+// it, and what a record without a value is listed as.
+const LIST_FILTERS = [
+  { param: 'technician', key: 'technicians', field: 'technician', label: 'Technician' },
+  { param: 'category', key: 'categories', field: 'category', label: 'Category', blank: '(No category)' },
+  { param: 'subcategory', key: 'subcategories', field: 'subcategory', label: 'Sub-category', blank: '(No sub-category)' },
+  { param: 'region', key: 'regions', field: 'region', label: 'Region', blank: '(No region)' },
+  { param: 'site', key: 'sites', field: 'site', label: 'Site', blank: '(No site)' },
+  { param: 'priority', key: 'priorities', field: 'priority', label: 'Priority', blank: '(No priority)' },
+  { param: 'group', key: 'groups', field: 'group', label: 'Group', blank: '(No group)' },
+  { param: 'request_type', key: 'requestTypes', field: 'request_type', label: 'Type', blank: '(No type)' },
+  { param: 'status', key: 'statuses', field: 'status', label: 'Status' },
+  { param: 'department', key: 'departments', field: 'department', label: 'Department', blank: '(No department)' },
+  { param: 'mode', key: 'modes', field: 'mode', label: 'Mode', blank: '(No mode)' },
+  { param: 'requester', key: 'requesters', field: 'requester', label: 'Requester', blank: '(No requester)' },
+];
+
+// The region a site belongs to: a rule naming the whole site, else a rule naming its first part ("Mumbai - Deonar" -> "Mumbai"),
+// else that first part itself. Rules come from Admin > Settings, one "Region: place, place" per line.
+function regionRules(text) {
+  const rules = new Map();
+  for (const line of String(text || '').split('\n')) {
+    const colon = line.indexOf(':');
+    if (colon < 1) continue;
+    const region = line.slice(0, colon).trim();
+    for (const place of line.slice(colon + 1).split(',')) if (place.trim()) rules.set(place.trim().toLowerCase(), region);
+  }
+  return rules;
+}
+function regionOf(site, rules) {
+  const name = String(site || '').trim();
+  if (!name) return null;
+  const place = name.split(/\s*[-\u2013\u2014]\s*/)[0].trim() || name;
+  return rules.get(name.toLowerCase()) || rules.get(place.toLowerCase()) || place;
+}
 
 // ── Configuration ──
 // Every threshold, target, bucket edge and list size below used to be a fixed number. They are settings now (Admin -> Settings ->
@@ -96,6 +133,7 @@ function cfg() {
     diffPct: n('insight_diff_pct'),
     gapPoints: n('insight_gap_points'),
     p90Ratio: n('insight_p90_ratio'),
+    regions: regionRules(settings.str('region_rules')),
   };
   cfgVersion = version;
   return cfgValue;
@@ -214,6 +252,8 @@ function shapeRecord(row, now, basis = 'assigned') {
     priority: row.priority || null,
     group: row.group_name || null,
     site: row.site || null,
+    region: regionOf(row.site, cfg().regions),
+    department: row.department || null,
     request_type: row.request_type || null,
     mode: row.mode || null,
     status: row.status,
@@ -335,14 +375,22 @@ function wallClockNow() {
   }
 }
 
-// Something that changes whenever the requests, their history or the roster change (kept apart, they are reloaded separately).
+// Something that changes whenever the requests, their history, the roster or who is marked inactive change (kept apart, they are
+// reloaded separately).
 async function fingerprint() {
-  const [[requests], [history], roster] = await Promise.all([
+  const [[requests], [history], roster, [inactive]] = await Promise.all([
     pool.query("SELECT COUNT(*) AS n, SUM(in_scope) AS s, SUM(status = 'Closed') AS c, MAX(last_synced_at) AS m, SUM(UNIX_TIMESTAMP(last_updated_at)) AS u FROM requests"),
     pool.query('SELECT COUNT(*) AS n, MAX(fetched_at) AS m, SUM(events) AS e, SUM(reassignments + reopen_count + tech_replies) AS x FROM request_history'),
     pool.query('SELECT COUNT(*) AS n, MAX(updated_at) AS m FROM technicians').catch(() => [[{}]]),
+    pool.query('SELECT COUNT(*) AS n, MAX(marked_at) AS m, SUM(CRC32(name)) AS h FROM inactive_technicians'),
   ]);
-  return { requests: JSON.stringify(requests[0]), history: JSON.stringify(history[0]), roster: JSON.stringify(roster[0][0]) };
+  return { requests: JSON.stringify(requests[0]), history: JSON.stringify(history[0]), roster: JSON.stringify(roster[0][0]), inactive: JSON.stringify(inactive[0]) };
+}
+
+// The technicians marked inactive: lower-case name -> when it was done.
+async function loadInactive() {
+  const [rows] = await pool.query('SELECT name, marked_at FROM inactive_technicians');
+  return new Map(rows.map(r => [r.name.toLowerCase(), r.marked_at]));
 }
 
 async function loadRoster() {
@@ -354,7 +402,7 @@ async function loadRoster() {
 
 async function loadRequestRows() {
   const [rows] = await pool.query(`SELECT r.me_id, r.display_id, r.subject, r.status, r.status_name, r.technician, r.technician_email, r.requester, r.category,
-           r.subcategory, r.priority, r.request_type, r.group_name, r.site, r.mode, r.created_at, r.assigned_at, r.completed_at, r.due_by, r.in_scope
+           r.subcategory, r.priority, r.request_type, r.group_name, r.site, r.department, r.mode, r.created_at, r.assigned_at, r.completed_at, r.due_by, r.in_scope
            FROM requests r`);
   return rows;
 }
@@ -363,10 +411,11 @@ async function loadRequestRows() {
 async function readSnapshot(fp, previous) {
   const reuse = previous && previous.fp.requests === fp.requests && previous.fp.roster === fp.roster;
   // Plain scans joined here are several times faster than the same join inside MySQL.
-  const [requests, [histories], roster] = await Promise.all([
+  const [requests, [histories], roster, inactive] = await Promise.all([
     reuse ? previous.requestRows : loadRequestRows(),
     pool.query(`SELECT ${HISTORY_SELECT} FROM request_history h`),
     reuse ? previous.roster : loadRoster(),
+    loadInactive(),
   ]);
   const byId = new Map();
   for (const h of histories) byId.set(h.hist, h);
@@ -382,7 +431,13 @@ async function readSnapshot(fp, previous) {
     for (const row of rows) if (row.technician && row.technician_email && !emailByName.has(row.technician)) emailByName.set(row.technician, row.technician_email);
   }
   const clock = Date.now();
-  return { requestRows: requests, rows, roster, emailByName, fp, now: wallClockNow(), clockAt: clock, loadedAt: clock, checkedAt: clock, shaped: new Map(), memo: new Map() };
+  return { requestRows: requests, rows, roster, inactive, emailByName, fp, now: wallClockNow(), clockAt: clock, loadedAt: clock, checkedAt: clock, shaped: new Map(), memo: new Map() };
+}
+
+// Someone was marked active or inactive: the next call notices at once (the rows in memory are kept).
+function refreshTechnicianStatus() {
+  generation++;
+  if (snapshot) snapshot = { ...snapshot, checkedAt: 0 };
 }
 
 function getSnapshot() {
@@ -398,6 +453,10 @@ function getSnapshot() {
       // The history collector writes all the time; its progress is picked up at most every HISTORY_REFRESH_MS
       // (and exactly when a collection finishes, which calls invalidateCache()).
       else if (fp.history !== current.fp.history && Date.now() - current.loadedAt >= HISTORY_REFRESH_MS) next = await readSnapshot(fp, current);
+      // Only the active / inactive marks changed: results are worked out again from the rows already in memory.
+      if (next === current && current && fp.inactive !== current.fp.inactive) {
+        next = { ...current, fp: { ...current.fp, inactive: fp.inactive }, inactive: await loadInactive(), shaped: new Map(), memo: new Map() };
+      }
       next.checkedAt = Date.now();
       if (next.checkedAt - next.clockAt >= CLOCK_EVERY_MS) {
         next = { ...next, now: wallClockNow(), clockAt: next.checkedAt, shaped: new Map(), memo: new Map() };
@@ -415,7 +474,11 @@ function getSnapshot() {
 function recordsFor(snap, basis) {
   let records = snap.shaped.get(basis);
   if (!records) {
-    records = snap.rows.map(row => shapeRecord(row, snap.now, basis));
+    records = snap.rows.map(row => {
+      const record = shapeRecord(row, snap.now, basis);
+      record.technician_inactive = snap.inactive.size > 0 && snap.inactive.has(record.technician.toLowerCase());
+      return record;
+    });
     snap.shaped.set(basis, records);
   }
   return records;
@@ -455,14 +518,11 @@ function parseFilters(query = {}) {
   if (from && to && from > to) [from, to] = [to, from];
   return {
     basis: BASES.includes(query.basis) ? query.basis : 'assigned',
+    // 'active' leaves out the technicians marked inactive; 'all' counts everyone.
+    techScope: TECH_SCOPES.includes(query.techs) ? query.techs : (settings.str('default_technician_scope') === 'all' ? 'all' : 'active'),
     from,
     to,
-    technicians: toList(query.technician),
-    categories: toList(query.category),
-    priorities: toList(query.priority),
-    groups: toList(query.group),
-    requestTypes: toList(query.request_type),
-    statuses: toList(query.status),
+    ...Object.fromEntries(LIST_FILTERS.map(f => [f.key, toList(query[f.param])])),
     search: String(query.search || '').trim().toLowerCase() || null,
     // 'all' | 'closed' | 'open' - only the raw record list uses this; metrics always use both.
     state: ['closed', 'open'].includes(query.state) ? query.state : 'all',
@@ -475,18 +535,14 @@ const lowerSet = list => new Set(list.map(v => v.toLowerCase()));
 // snapshot, so a historical range never hides what is still outstanding.
 function applyBaseFilters(records, filters) {
   const technicians = lowerSet(filters.technicians);
-  const categories = lowerSet(filters.categories);
-  const priorities = lowerSet(filters.priorities);
-  const groups = lowerSet(filters.groups);
-  const types = lowerSet(filters.requestTypes);
-  const statuses = lowerSet(filters.statuses);
+  const chosen = LIST_FILTERS.filter(f => f.key !== 'technicians' && filters[f.key]?.length).map(f => ({ ...f, wanted: lowerSet(filters[f.key]) }));
+  // "Active only" leaves out the SRs of technicians marked inactive. Naming technicians in the filter shows exactly those, active
+  // or not, and `keep` holds the one whose own page is open so their team comparison still includes them. Unassigned SRs stay.
+  const activeOnly = filters.techScope === 'active' && !technicians.size;
   return records.filter(r => {
+    if (activeOnly && r.technician_inactive && r.technician !== filters.keep) return false;
     if (technicians.size && !technicians.has(r.technician.toLowerCase())) return false;
-    if (categories.size && !categories.has(String(r.category || '(No category)').toLowerCase())) return false;
-    if (priorities.size && !priorities.has(String(r.priority || '(No priority)').toLowerCase())) return false;
-    if (groups.size && !groups.has(String(r.group || '(No group)').toLowerCase())) return false;
-    if (types.size && !types.has(String(r.request_type || '(No type)').toLowerCase())) return false;
-    if (statuses.size && !statuses.has(r.status.toLowerCase())) return false;
+    for (const f of chosen) if (!f.wanted.has(String(r[f.field] || f.blank).toLowerCase())) return false;
     if (filters.search) {
       const haystack = `${r.sr_number} ${r.description || ''} ${r.category || ''} ${r.technician} ${r.requester || ''}`.toLowerCase();
       if (!haystack.includes(filters.search)) return false;
@@ -939,24 +995,78 @@ function buildFacets(snap, records) {
     if (!stats.has(t.name)) stats.set(t.name, { name: t.name, assigned: 0, closed: 0, open: 0 });
     if (t.email && !emailByName.has(t.name)) emailByName.set(t.name, t.email);
   }
-  const distinct = pick => [...new Set(records.map(pick).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  // What a dropdown offers: the values that occur, plus "(No ...)" when some SRs have none. Nothing at all when no SR has a value.
+  const blankOf = field => LIST_FILTERS.find(f => f.field === field).blank;
+  const distinct = field => {
+    const found = new Set();
+    let missing = false;
+    for (const r of records) if (r[field]) found.add(r[field]); else missing = true;
+    const list = [...found].sort((a, b) => a.localeCompare(b));
+    return missing && list.length ? [...list, blankOf(field)] : list;
+  };
+  // The same for a filter that depends on another one: each value says which values of the parent it occurs under.
+  const within = (field, parent) => {
+    const found = new Map();
+    for (const r of records) {
+      const value = r[field] || blankOf(field);
+      let parents = found.get(value);
+      if (!parents) found.set(value, parents = new Set());
+      parents.add(r[parent] || blankOf(parent));
+    }
+    const blank = blankOf(field);
+    if (found.size === 1 && found.has(blank)) return [];
+    return [...found].sort(([a], [b]) => (a === blank) - (b === blank) || a.localeCompare(b)).map(([value, parents]) => ({ value, within: [...parents] }));
+  };
   const closedDays = records.filter(r => r.closed_at).map(r => dateOnly(r.closed_at)).sort();
   const withDue = records.filter(r => r.status === 'Closed' && r.resolved && r.due_by).length;
   const present = new Set(records.map(r => r.status));
   return {
     has_due_times: withDue >= cfg().minDue,
     technicians: [...stats.values()]
-      .map(t => ({ ...t, email: emailByName.get(t.name) || null, unassigned: t.name === UNASSIGNED }))
+      .map(t => ({ ...t, email: emailByName.get(t.name) || null, unassigned: t.name === UNASSIGNED, active: !snap.inactive.has(t.name.toLowerCase()) }))
       .sort((a, b) => a.unassigned - b.unassigned || a.name.localeCompare(b.name)),
-    categories: distinct(r => r.category),
-    priorities: distinct(r => r.priority),
-    groups: distinct(r => r.group),
-    request_types: distinct(r => r.request_type),
+    inactive_technicians: [...stats.keys()].filter(name => snap.inactive.has(name.toLowerCase())).length,
+    categories: distinct('category'),
+    subcategories: within('subcategory', 'category'),
+    regions: distinct('region'),
+    sites: within('site', 'region'),
+    priorities: distinct('priority'),
+    groups: distinct('group'),
+    request_types: distinct('request_type'),
+    departments: distinct('department'),
+    modes: distinct('mode'),
+    requesters: distinct('requester'),
     // Only the statuses that exist in the data (a filter on one that never occurs would just show an empty page).
     statuses: [...STATUS_ORDER.filter(s => present.has(s)), ...[...present].filter(s => !STATUS_ORDER.includes(s)).sort()],
     first_closed: closedDays[0] || null,
     last_closed: closedDays[closedDays.length - 1] || null,
   };
+}
+
+// Everyone the app knows of, with what helps decide who still counts as active. Always the whole data set, whatever is filtered.
+async function technicianDirectory() {
+  const snap = await getSnapshot();
+  return memoized(snap, 'directory', async () => {
+    const records = recordsFor(snap, 'assigned');
+    const windowDays = cfg().recentDays;
+    const since = wallClockMs(snap.now) - windowDays * DAY_MINUTES * MINUTE_MS;
+    const known = (await facets(records)).technicians.filter(t => !t.unassigned);
+    const extra = new Map(known.map(t => [t.name, { closed_recent: 0, last_activity: null }]));
+    for (const r of records) {
+      const entry = extra.get(r.technician);
+      if (!entry) continue;
+      if (r.closed_at && wallClockMs(r.closed_at) > since) entry.closed_recent++;
+      const latest = r.closed_at && r.closed_at > (r.start_at || '') ? r.closed_at : r.start_at;
+      if (latest && latest > (entry.last_activity || '')) entry.last_activity = latest;
+    }
+    return {
+      recent_days: windowDays,
+      technicians: known.map(t => ({
+        name: t.name, email: t.email, assigned: t.assigned, closed: t.closed, open: t.open, ...extra.get(t.name),
+        active: t.active, inactive_since: snap.inactive.get(t.name.toLowerCase()) || null,
+      })),
+    };
+  });
 }
 
 // ── Builders ──
@@ -1092,11 +1202,12 @@ function computeTechnician(snap, name, filters) {
   const canonical = existing ? existing.technician : onRoster.name;
 
   // The team is everyone under the same filters, apart from the technician filter itself.
-  const teamFilters = { ...filters, technicians: [] };
+  const teamFilters = { ...filters, technicians: [], keep: canonical };
   const teamBase = applyBaseFilters(all, teamFilters);
   const team = applyDateFilter(teamBase, teamFilters);
   const mineBase = teamBase.filter(r => r.technician === canonical);
   const mine = applyDateFilter(mineBase, filters);
+  const markedInactive = snap.inactive.has(canonical.toLowerCase());
 
   const summary = summarize(mine);
   const teamSummary = summarize(team);
@@ -1129,7 +1240,7 @@ function computeTechnician(snap, name, filters) {
   return {
     generated_at: now,
     basis: filters.basis,
-    technician: { name: canonical, email, first_assigned: starts[0] || null, last_assigned: starts[starts.length - 1] || null },
+    technician: { name: canonical, email, active: !markedInactive, first_assigned: starts[0] || null, last_assigned: starts[starts.length - 1] || null },
     summary,
     team: teamSummary,
     technician_count: peers.filter(p => p.key !== UNASSIGNED).length,
@@ -1355,7 +1466,7 @@ async function buildRequest(id) {
 const ANALYTIC_KEYS = new Set(['min_ranked_closed', 'min_due_sample', 'target_days_1', 'target_days_2', 'target_days_3', 'first_reply_target_1_minutes',
   'first_reply_target_2_minutes', 'stale_days_1', 'stale_days_2', 'count_weekends', 'tat_bucket_edges', 'aging_bucket_edges', 'reply_bucket_edges',
   'reassign_bucket_max', 'recent_window_days', 'top_n_matrix', 'top_n_handovers', 'insight_sla_good_pct', 'insight_sla_bad_pct', 'insight_diff_pct',
-  'insight_gap_points', 'insight_p90_ratio', 'portal_time_zone']);
+  'insight_gap_points', 'insight_p90_ratio', 'portal_time_zone', 'region_rules']);
 settings.onChange(changed => {
   if (!changed.some(k => ANALYTIC_KEYS.has(k)) || !snapshot) return;
   generation++;
@@ -1363,9 +1474,12 @@ settings.onChange(changed => {
 });
 
 module.exports = {
-  BASES, DAY_MINUTES, hasDueTimes, GROUP_DIMENSIONS, WEEKDAYS, cfg, dayWord, dayBuckets, replyBuckets, reassignBuckets, weekendMs, elapsedMinutes,
+  BASES, LIST_FILTERS, DAY_MINUTES, hasDueTimes, GROUP_DIMENSIONS, WEEKDAYS, cfg, dayWord, dayBuckets, replyBuckets, reassignBuckets, weekendMs, elapsedMinutes,
   get MIN_DUE_SAMPLE() { return cfg().minDue; }, get MIN_SAMPLE() { return cfg().minSample; },
   get TAT_BUCKETS() { return cfg().tat; }, get RESPONSE_BUCKETS() { return cfg().reply; }, get REASSIGN_BUCKETS() { return cfg().reassign; },
   aging, applyFilters, handlingSection, summarizeHandling, buildExplore, buildOverview, buildRecords, buildRequest, buildTechnician, distribution, explore, facets,
   fmtDuration, invalidateCache, loadRecords, minutesBetween, parseFilters, percentile, shapeRecord, summarize, weekStart,
+  refreshTechnicianStatus, technicianDirectory,
+  // How many technicians are marked inactive, as of the figures last worked out.
+  inactiveCount: () => snapshot?.inactive.size || 0,
 };

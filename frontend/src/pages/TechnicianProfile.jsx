@@ -1,10 +1,12 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { Alert, Button, Select, message } from 'antd';
+import { Alert, Button, Select, Switch, Tag, message } from 'antd';
 import { ArrowLeftOutlined, FileExcelOutlined } from '@ant-design/icons';
-import { reportAPI } from '../services/api';
+import { reportAPI, technicianAPI } from '../services/api';
 import { useFilters } from '../context/Filters';
+import { useAuth } from '../context/Auth';
+import { technicianOptions } from '../utils/technicians';
 import FilterBar from '../components/FilterBar';
 import { DrillHost, useDrill } from '../components/DrillDrawer';
 import RecordsTable from '../components/RecordsTable';
@@ -48,8 +50,22 @@ export default function TechnicianProfile() {
   const { name: routeName } = useParams();
   const name = decodeURIComponent(routeName);
   const navigate = useNavigate();
-  const { buildParams, basis, meta, dataVersion } = useFilters();
+  const { buildParams, basis, meta, dataVersion, bumpData } = useFilters();
+  const { canSync: canManage } = useAuth();
   const [exporting, setExporting] = useState(false);
+  const [marking, setMarking] = useState(false);
+  // From the shared list, which is reloaded as soon as the mark changes.
+  const person = meta?.facets?.technicians?.find(t => t.name === name && !t.unassigned);
+  const isActive = person?.active !== false;
+
+  async function setActive(value) {
+    setMarking(true);
+    try {
+      await technicianAPI.setStatus(value ? { active: [name] } : { inactive: [name] });
+      message.success(`${name} is now ${value ? 'active' : 'inactive'}`);
+      bumpData();
+    } catch (e) { message.error(e.message || 'The change could not be saved'); } finally { setMarking(false); }
+  }
   const params = buildParams(false);
   const paramsKey = JSON.stringify(params);
   const { data: raw, loading, error, reload } = useAbortableLoad(signal => cancellable.technician(name, params, signal), [name, paramsKey, dataVersion]);
@@ -71,15 +87,21 @@ export default function TechnicianProfile() {
         <div className="profile-head">
           <div className="avatar lg" aria-hidden="true">{initials(name)}</div>
           <div style={{ flex: 1, minWidth: 220 }}>
-            <h2>{name}</h2>
+            <h2>{name}{!isActive && <Tag style={{ marginLeft: 10, verticalAlign: 'middle' }}>Inactive</Tag>}</h2>
             <div className="an-profile-meta">
               {data?.technician.email && <span>{data.technician.email}</span>}
               <span>{data?.technician.first_assigned ? `SRs assigned from ${dayjs(data.technician.first_assigned).format('DD-MMM-YYYY')} to ${dayjs(data.technician.last_assigned).format('DD-MMM-YYYY')}` : loading ? 'Loading...' : ''}</span>
             </div>
           </div>
+          {canManage && person && (
+            <label className="profile-active">
+              <Switch checked={isActive} loading={marking} onChange={setActive} aria-label={`${name} is active`} />
+              Active
+            </label>
+          )}
           <Select
             showSearch style={{ width: 280, maxWidth: '100%' }} value={name} optionFilterProp="label" aria-label="Switch technician"
-            options={(meta?.facets?.technicians || []).filter(x => !x.unassigned).map(x => ({ value: x.name, label: x.name }))}
+            options={technicianOptions((meta?.facets?.technicians || []).filter(x => !x.unassigned))}
             onChange={goTo}
           />
           <Button type="primary" icon={<FileExcelOutlined />} loading={exporting} disabled={!data} onClick={exportReport}>Excel report</Button>

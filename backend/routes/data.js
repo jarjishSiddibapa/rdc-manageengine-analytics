@@ -7,21 +7,24 @@ const reports = require('../services/reports');
 const settings = require('../services/settings');
 const sync = require('../services/sync');
 const history = require('../services/history');
+const technicians = require('../services/technicians');
 
 const router = express.Router();
 
 // Query strings arrive as text, or as arrays when a name is repeated. Everything is reduced to short text (the filter lists may stay lists)
 // so no handler ever has to wonder what type it was given.
-const LIST_PARAMS = new Set(['technician', 'category', 'priority', 'group', 'request_type', 'status']);
+const LIST_PARAMS = new Set(analytics.LIST_FILTERS.map(f => f.param));
 const MAX_PARAM_CHARS = 300;
+// A list filter may carry many names joined together, so it gets far more room than a single value (never cut one off half way).
+const MAX_LIST_CHARS = 12000;
 function cleanQuery(query) {
   const out = {};
   for (const [name, value] of Object.entries(query || {})) {
     if (Array.isArray(value)) {
-      const items = value.filter(v => typeof v === 'string').slice(0, 100).map(v => v.slice(0, MAX_PARAM_CHARS));
+      const items = value.filter(v => typeof v === 'string').slice(0, 500).map(v => v.slice(0, MAX_PARAM_CHARS));
       if (LIST_PARAMS.has(name)) out[name] = items;
       else if (items.length) out[name] = items[0];
-    } else if (typeof value === 'string') out[name] = value.slice(0, MAX_PARAM_CHARS);
+    } else if (typeof value === 'string') out[name] = value.slice(0, LIST_PARAMS.has(name) ? MAX_LIST_CHARS : MAX_PARAM_CHARS);
   }
   return out;
 }
@@ -40,6 +43,7 @@ router.get('/meta', async (req, res) => {
   res.json({
     default_basis: cfg.default_basis,
     default_aggregation: cfg.default_aggregation === 'median' ? 'median' : 'average',
+    default_technician_scope: cfg.default_technician_scope === 'all' ? 'all' : 'active',
     auto_sync_minutes: Number(cfg.auto_sync_minutes) || 0,
     // What the screens need to word their labels and to size their lists (all settings, see Admin -> Settings -> Analytics).
     ui: {
@@ -93,6 +97,19 @@ router.get('/analytics/request/:id', async (req, res) => {
   const row = await analytics.buildRequest(String(req.params.id).slice(0, 40));
   if (!row) return res.status(404).json({ message: 'Request not found' });
   res.json(row);
+});
+
+// ── Technicians: who counts as active ──
+router.get('/technicians', async (_req, res) => res.json(await technicians.list()));
+
+router.put('/technicians/status', auth.requireRole('admin', 'manager'), async (req, res) => {
+  const changed = await technicians.setStatus(req.body, req.user.email);
+  const detail = [
+    changed.deactivated.length && `Inactive: ${changed.deactivated.join(', ')}`,
+    changed.activated.length && `Active: ${changed.activated.join(', ')}`,
+  ].filter(Boolean).join(' | ');
+  if (detail) await audit.record(req, 'technicians_status_changed', { target: `${changed.deactivated.length + changed.activated.length} technician(s)`, detail });
+  res.json({ ...changed, ...(await technicians.list()) });
 });
 
 // ── Excel reports ──

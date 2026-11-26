@@ -117,12 +117,19 @@ const SCHEMA = [
   { key: 'insight_p90_ratio', section: 'Insight wording', label: 'Slowest tenth: warn when this many times the team\'s', type: 'number', default: '1.5', min: 1, max: 10, step: 0.1,
     help: 'Warn when a technician\'s 90th percentile turnaround is this many times the team\'s.' },
 
+  { key: 'region_rules', section: 'Regions', label: 'Places that belong to one region', type: 'rules', max: 6000,
+    default: ['Gurgaon: Gurugram', 'Bangalore: Bagalore', 'Guwahati: Guhawati', 'Vadodara: Vadodra', 'Umrangshu: Umarngshu', 'Mumbai: Mumbai Raheja', 'Goa: Goa DLF Bay View'].join('\n'),
+    help: 'The Region filter takes the first part of each site name ("Mumbai - Deonar" is in Mumbai). To merge spellings or group places into zones, write one rule per line as Region: place, place (for example "South: Bangalore, Chennai, Hyderabad"). A place may also be a whole site name. Places not listed keep their own name.' },
+
   { key: 'default_basis', section: 'Defaults for everyone', label: 'How turnaround is measured by default', type: 'enum', default: 'assigned',
     options: [['assigned', 'Since the SR was assigned to the technician'], ['raised', 'Since the SR was raised']],
     help: 'Each person can switch this at the top of the page; this is what everyone starts with.' },
   { key: 'default_aggregation', section: 'Defaults for everyone', label: 'Figure shown first for times', type: 'enum', default: 'average',
     options: [['average', 'Average (mean)'], ['median', 'Median (the typical SR)']],
     help: 'Turnaround, first reply and similar times show this figure as the main one, with the other beside it. Each person can switch it at the top of the page; this is what everyone starts with.' },
+  { key: 'default_technician_scope', section: 'Defaults for everyone', label: 'Technicians counted by default', type: 'enum', default: 'active',
+    options: [['active', 'Active technicians only'], ['all', 'All technicians']],
+    help: 'Active only leaves out the SRs of technicians marked inactive (on the Technicians page). Each person can switch it above the filters.' },
   { key: 'default_preset', section: 'Defaults for everyone', label: 'Period shown when nobody has chosen one', type: 'enum', default: 'all', options: PRESETS,
     help: 'The date range new visitors start with (people who have chosen their own keep it).' },
   { key: 'default_page_size', section: 'Defaults for everyone', label: 'Rows per page in SR lists', type: 'enum', default: '25', options: GRADES, help: 'People can still change it on each table.' },
@@ -149,7 +156,7 @@ const SCHEMA = [
   int('password_reset_ip_per_hour', 'Password reset', 'Reset requests per hour from one address', 10, 1, 500, 'Beyond this, further requests from that address are refused until the hour has passed.', { unit: 'requests' }),
 
   // ───────────── Identity ─────────────
-  text('app_name', 'Names', 'Application name', 'ManageEngine Analytics', 60, 'Shown in the sidebar, the sign-in page, the browser tab, emails and Excel files.', { required: true }),
+  text('app_name', 'Names', 'Application name', 'RDC ManageEngine SR Analytics', 60, 'Shown in the sidebar, the sign-in page, the browser tab, emails and Excel files.', { required: true }),
   text('org_name', 'Names', 'Organisation name', '', 80, 'Optional. Shown under the application name on the sign-in page.'),
   text('public_url', 'Names', 'Web address people use to open this app', '', 200,
     'Used for the link in password-reset emails, for example http://servername:7780 or https://analytics.yourcompany.com. Blank uses http://localhost and the port, which only works on the PC that runs the app. It is never taken from the browser, so a forged request cannot point the link elsewhere.'),
@@ -164,7 +171,7 @@ const SCHEMA = [
     help: 'An IANA name such as Asia/Kolkata. ManageEngine sends moments in absolute time; they are stored as this portal\'s wall-clock time. SRs already stored keep their old conversion until they are read again (run a Deep sync after changing it).' },
 
   // ───────────── Reports ─────────────
-  { key: 'report_file_prefix', section: 'Excel files', label: 'File-name prefix', type: 'filename', default: 'ManageEngine_Analytics', max: 40,
+  { key: 'report_file_prefix', section: 'Excel files', label: 'File-name prefix', type: 'filename', default: 'RDC_ManageEngine_SR_Analytics', max: 40,
     help: 'Letters, numbers, dashes and underscores. Files are named PREFIX_Report_2026-01-31.xlsx.' },
   text('report_title_prefix', 'Excel files', 'Report title prefix', '', 60, 'Optional text put in front of each report\'s title (inside the workbook), for example your company name.'),
   int('report_max_rows', 'Limits', 'Most rows in a chart/table export', 100000, 1000, 1000000, 'Applies to "Download > Excel" on charts and tables.', { unit: 'rows' }),
@@ -189,7 +196,7 @@ const SCHEMA = [
 // Which group each section belongs to.
 const SECTION_GROUP = {
   'Automatic sync': 'sync', 'Daily deep sync': 'sync', 'Talking to ManageEngine': 'sync', 'SR history': 'sync',
-  'Closing-time targets': 'analytics', Buckets: 'analytics', 'Ranking, windows & lists': 'analytics', 'Insight wording': 'analytics', 'Defaults for everyone': 'analytics',
+  'Closing-time targets': 'analytics', Buckets: 'analytics', 'Ranking, windows & lists': 'analytics', 'Insight wording': 'analytics', Regions: 'analytics', 'Defaults for everyone': 'analytics',
   Sessions: 'security', 'Sign-in lockout': 'security', Passwords: 'security', 'Password reset': 'security', 'Requests & exports': 'security',
   Names: 'identity', 'Sign-in page': 'identity', 'Time zone': 'identity', 'Excel files': 'reports', Limits: 'reports', 'Backup limits': 'reports',
 };
@@ -281,6 +288,23 @@ function coerce(def, raw) {
     case 'filename': {
       const value = typeof raw === 'string' ? raw.trim() : '';
       if (value.length > def.max || !/^[A-Za-z0-9_-]*$/.test(value)) fail(`letters, numbers, dashes and underscores only, at most ${def.max} characters`);
+      return value;
+    }
+    case 'rules': {
+      if (typeof raw !== 'string') fail('must be text');
+      const lines = raw.split(/[\r\n;]+/).map(l => l.trim().replace(/\s+/g, ' ')).filter(Boolean);
+      const seen = new Set();
+      for (const line of lines) {
+        const colon = line.indexOf(':');
+        const places = colon > 0 ? line.slice(colon + 1).split(',').map(p => p.trim().toLowerCase()).filter(Boolean) : [];
+        if (!places.length || !line.slice(0, colon).trim()) fail(`write each line as "Region: place, place" (see "${line.slice(0, 40)}")`);
+        for (const place of places) {
+          if (seen.has(place)) fail(`"${place.slice(0, 60)}" is listed more than once`);
+          seen.add(place);
+        }
+      }
+      const value = lines.join('\n');
+      if (value.length > def.max) fail(`at most ${def.max} characters`);
       return value;
     }
     case 'edges': {

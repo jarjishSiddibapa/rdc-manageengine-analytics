@@ -32,6 +32,9 @@ After syncs, a worker pool fetches `/requests/{id}/history` for SRs that have no
 - The whole table is read once into a snapshot (about 64,000 SRs) and shaped per basis. Results are cached by filter key; a cheap fingerprint query notices data changes.
 - `assigned` basis: turnaround = completed − assigned (fallback to raised when never assigned or assigned after closing). `raised` basis: completed − created.
 - Every chart/KPI has a drill predicate that returns exactly the SRs behind the number (totals are tested to match).
+- **List filters** are defined once on each side (`LIST_FILTERS` in `analytics.js`, `FILTER_FIELDS` in `context/Filters.jsx`): technician, category, sub-category, region, site, priority, group, request type, status, department, mode, requester. A filter that has nothing to choose between is hidden; sub-category follows category and site follows region.
+- **Region** is not a ManageEngine field. It is the first part of the site name (`Mumbai - Deonar` is Mumbai), after the `region_rules` setting has merged or grouped places.
+- **Active technicians**: table `inactive_technicians` holds only the names marked inactive (`services/technicians.js`, `PUT /api/technicians/status`, administrators and managers). With `techs=active` their SRs are left out, except when a technician is named in the filter; a technician's own page keeps them in the comparison. Unassigned SRs always count.
 
 ## Security model
 - Passwords: scrypt (parameters stored in the hash; old hashes upgraded on login). Sessions: random token, only its hash stored; HttpOnly SameSite cookie; idle and absolute lifetimes; revoked on disable, role change, password change and delete.

@@ -6,7 +6,7 @@ const connections = require('./connections');
 // SMTP_* lines in backend\.env) the app works exactly the same and the backup screen says email is not set up.
 // The details are read at the moment of sending, so a change on the Admin screen applies to the very next email.
 const BRAND = '#0e7c86';
-const appName = () => settings.str('app_name') || 'ManageEngine Analytics';
+const appName = () => settings.str('app_name') || 'RDC ManageEngine SR Analytics';
 
 let transporter = null;
 let transporterKey = null;

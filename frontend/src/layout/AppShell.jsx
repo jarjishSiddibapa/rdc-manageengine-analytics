@@ -24,10 +24,17 @@ const titleFor = (path, fallback) => TITLES.find(([p]) => (p === '/' ? path === 
 const ANALYTIC_PAGES = ['/', '/technicians', '/srs'];
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"]), input, select, textarea';
 
-// "ManageEngine Analytics" -> two lines in the narrow sidebar: the first word, then the rest.
+// A name takes two lines in the narrow sidebar, split between words where the two lines come out most even:
+// "RDC ManageEngine SR Analytics" -> "RDC ManageEngine" / "SR Analytics".
 function brandLines(name) {
-  const [first, ...rest] = String(name).trim().split(/\s+/);
-  return rest.length ? <>{first}<br />{rest.join(' ')}</> : first;
+  const words = String(name).trim().split(/\s+/);
+  if (words.length < 2) return words[0];
+  const lines = cut => [words.slice(0, cut).join(' '), words.slice(cut).join(' ')];
+  const longest = cut => Math.max(...lines(cut).map(l => l.length));
+  let best = 1;
+  for (let cut = 2; cut < words.length; cut++) if (longest(cut) < longest(best)) best = cut;
+  const [top, bottom] = lines(best);
+  return <>{top}<br />{bottom}</>;
 }
 
 // The counter changes every couple of seconds while a sync runs. It is drawn in tabular digits inside a box that keeps its width

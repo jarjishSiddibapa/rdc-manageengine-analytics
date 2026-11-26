@@ -44,6 +44,10 @@ function problemWith(def, d) {
     case 'text':
       if (def.required && !text) return 'This cannot be blank';
       return text.length > def.max_chars ? `At most ${def.max_chars} characters` : null;
+    case 'rules': {
+      const bad = text.split(/[\n;]+/).map(l => l.trim()).filter(Boolean).find(l => !/^[^:]+:.*[^\s,]/.test(l));
+      return bad ? `Write each line as "Region: place, place" (see "${bad.slice(0, 40)}")` : text.length > def.max ? `At most ${def.max} characters` : null;
+    }
     case 'date':
       return text && (!/^\d{4}-\d{2}-\d{2}$/.test(text) || !dayjs(text, 'YYYY-MM-DD', true).isValid()) ? 'Use the form YYYY-MM-DD, for example 2025-10-01 (or leave blank)' : null;
     case 'time':
@@ -71,6 +75,7 @@ function defaultText(def) {
   const v = def.default;
   if (def.type === 'bool') return v === '1' ? 'On' : 'Off';
   if (def.type === 'enum') return def.options.find(o => o.value === v)?.label || v;
+  if (def.type === 'rules') return v ? v.split('\n').join('; ') : 'blank';
   if (v === '') return def.type === 'date' ? 'blank (read back to the first SR)' : 'blank';
   return def.unit && isNumeric(def) ? `${v} ${def.unit}` : v;
 }
@@ -91,6 +96,8 @@ function Control({ def, value, onChange, invalid }) {
           {def.unit && <span className="set-unit">{def.unit}</span>}
         </>
       );
+    case 'rules':
+      return <Input.TextArea id={id} value={value} onChange={e => onChange(e.target.value)} maxLength={def.max} autoSize={{ minRows: 5, maxRows: 14 }} status={status} placeholder="South: Bangalore, Chennai, Hyderabad" style={{ maxWidth: 'none' }} />;
     case 'enum':
       return <Select id={id} value={value} onChange={onChange} options={def.options} status={status} />;
     case 'time':

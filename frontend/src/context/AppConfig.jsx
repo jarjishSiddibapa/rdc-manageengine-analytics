@@ -6,7 +6,7 @@ import { setExportBrand } from '../utils/exporters';
 // anybody has signed in, from the public endpoint (nothing secret). The values below are what shows until it answers - and what shows
 // if it never does - and they are the shipped defaults.
 export const FALLBACK_CONFIG = {
-  app_name: 'ManageEngine Analytics',
+  app_name: 'RDC ManageEngine SR Analytics',
   org_name: '',
   sidebar_subtitle: 'Service desk',
   login_subtitle: 'Service desk performance',

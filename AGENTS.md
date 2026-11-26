@@ -21,7 +21,7 @@ Token-saving habits for this repo:
 ## Project knowledge
 
 ### What this is
-ManageEngine Analytics: a read-only analytics web app over ManageEngine ServiceDesk Plus Cloud. It copies SRs (service requests) and each SR's change history into MySQL, then shows turnaround, handling quality (reassignments, reopens, first reply, holds), per-technician performance, Excel reports, user management and database backups. It never writes to ManageEngine (OAuth scope `SDPOnDemand.requests.READ` only).
+RDC ManageEngine SR Analytics: a read-only analytics web app over ManageEngine ServiceDesk Plus Cloud. It copies SRs (service requests) and each SR's change history into MySQL, then shows turnaround, handling quality (reassignments, reopens, first reply, holds), per-technician performance, Excel reports, user management and database backups. It never writes to ManageEngine (OAuth scope `SDPOnDemand.requests.READ` only).
 
 ### Stack
 - Backend: Node 20+, Express 5, `mysql2/promise` (pool, `dateStrings: true`, no ORM), `exceljs`, `node-cron`, `nodemailer`, `compression`. Sessions: random token in an HttpOnly cookie `mea_session` (hash stored), scrypt passwords, header `X-Requested-With: ManageEngineAnalytics` required on every write.
@@ -55,13 +55,15 @@ frontend/src/
 ```
 
 ### Data model (tables)
-`requests` (one row per SR, `me_id` PK, `in_scope`), `request_history` (one row per SR: counts, times, windows), `request_events` (timeline), `sync_runs` (quick/deep/history runs), `users`, `sessions`, `audit_log`, `settings` (key/value), `backup_runs`.
+`requests` (one row per SR, `me_id` PK, `in_scope`), `request_history` (one row per SR: counts, times, windows), `request_events` (timeline), `inactive_technicians` (names the team no longer counts), `sync_runs` (quick/deep/history runs), `users`, `sessions`, `audit_log`, `settings` (key/value), `backup_runs`.
 
 ### Rules of the road
 - Default analytics basis is **assigned to completed**; the alternative is raised to completed. SRs never assigned (or assigned after closing) fall back to raised. Calendar time, weekends included. Times are wall-clock strings in the portal time zone.
 - Never write to ManageEngine. Never delete SR rows (a deep sync only flags `in_scope = 0`).
 - Only one sync, one history collector and one backup may run at a time across all copies of the app: they hold MySQL named locks `<DB_NAME>:sync|history|backup`. Extra test copies must set `NO_BACKGROUND=1` and a different `PORT`, or they will start syncs against ManageEngine (which rate-limits).
 - New tunable values go in `settings.js` (default + validation), not as constants.
+- A new list filter is one entry in `LIST_FILTERS` (`analytics.js`) and one in `FILTER_FIELDS` (`frontend/src/context/Filters.jsx`), plus its facet in `buildFacets`.
+- Keep GitHub (`main`) up to date after finished work; secrets, backups and `graphify-out/` stay untracked.
 - Backups never include the `sessions` table.
 
 ### How changes get verified

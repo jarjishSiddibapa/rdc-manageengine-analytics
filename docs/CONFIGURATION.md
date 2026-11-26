@@ -121,12 +121,19 @@ How the figures are measured, grouped and ranked. A change recalculates every sc
 | Target gap that is worth a remark (points) | `insight_gap_points` | 5 points | 1 to 50 |
 | Slowest tenth: warn when this many times the team's | `insight_p90_ratio` | 1.5 | 1 to 10 |
 
+**Regions**
+
+| Setting | Key | Default | Allowed |
+|---|---|---|---|
+| Places that belong to one region | `region_rules` | Gurgaon: Gurugram; Bangalore: Bagalore; Guwahati: Guhawati; Vadodara: Vadodra; Umrangshu: Umarngshu; Mumbai: Mumbai Raheja; Goa: Goa DLF Bay View | one `Region: place, place` per line, up to 6000 characters |
+
 **Defaults for everyone**
 
 | Setting | Key | Default | Allowed |
 |---|---|---|---|
 | How turnaround is measured by default | `default_basis` | assigned |  |
 | Figure shown first for times | `default_aggregation` | average |  |
+| Technicians counted by default | `default_technician_scope` | active | active, all |
 | Period shown when nobody has chosen one | `default_preset` | all |  |
 | Rows per page in SR lists | `default_page_size` | 25 |  |
 | Largest page the server will return | `records_max_page_size` | 500 rows | 50 to 5000 |
@@ -183,7 +190,7 @@ The names, texts and time zone shown to your people.
 
 | Setting | Key | Default | Allowed |
 |---|---|---|---|
-| Application name | `app_name` | ManageEngine Analytics | text, up to 60 characters |
+| Application name | `app_name` | RDC ManageEngine SR Analytics | text, up to 60 characters |
 | Organisation name | `org_name` | (blank) | text, up to 80 characters |
 | Web address people use to open this app | `public_url` | (blank) | text, up to 200 characters |
 | Sidebar subtitle | `sidebar_subtitle` | Service desk | text, up to 40 characters |
@@ -211,7 +218,7 @@ Excel file names, titles and size limits, and the backup email limits.
 
 | Setting | Key | Default | Allowed |
 |---|---|---|---|
-| File-name prefix | `report_file_prefix` | ManageEngine_Analytics |  |
+| File-name prefix | `report_file_prefix` | RDC_ManageEngine_SR_Analytics |  |
 | Report title prefix | `report_title_prefix` | (blank) | text, up to 60 characters |
 
 **Limits**

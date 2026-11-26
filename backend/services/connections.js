@@ -109,7 +109,7 @@ function manageEngine(overrides = {}) {
   };
 }
 
-function smtp(overrides = {}, appName = 'ManageEngine Analytics') {
+function smtp(overrides = {}, appName = 'RDC ManageEngine SR Analytics') {
   const v = { ...state.values, ...overrides };
   const port = Number(v.smtp_port) || 587;
   const secureRaw = String(v.smtp_secure ?? '').trim().toLowerCase();

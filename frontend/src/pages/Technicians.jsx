@@ -1,9 +1,12 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Alert, Button, Empty, Grid, Input, Select, Table, Tag, Tooltip, Typography, message } from 'antd';
-import { FileExcelOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons';
+import { FileExcelOutlined, SearchOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
 import { reportAPI } from '../services/api';
 import { useFilters } from '../context/Filters';
+import { useAuth } from '../context/Auth';
+import TechnicianStatus from '../components/TechnicianStatus';
+import { technicianOptions } from '../utils/technicians';
 import FilterBar from '../components/FilterBar';
 import { Kpi, KpiGrid } from '../components/Kpi';
 import { ChartCard, ScatterPlot } from '../components/charts';
@@ -43,7 +46,11 @@ function VsTeam({ value, team, what = 'median' }) {
 
 // Every technician side by side, plus a dropdown to open any one of them.
 export default function Technicians() {
-  const { buildParams, meta, dataVersion, basis } = useFilters();
+  const { buildParams, meta, dataVersion, basis, techScope } = useFilters();
+  const { canSync: canManage } = useAuth();
+  const [managing, setManaging] = useState(false);
+  const inactiveCount = meta?.facets?.inactive_technicians || 0;
+  const inactive = useMemo(() => new Set((meta?.facets?.technicians || []).filter(t => t.active === false).map(t => t.name)), [meta]);
   const defaultBasis = meta?.default_basis || 'assigned';
   const ui = useUi();
   const A = useAgg();
@@ -78,6 +85,7 @@ export default function Technicians() {
           render: (v, row) => (
             <>
               {v === '(Unassigned)' ? <Text type="secondary">{v}</Text> : <button type="button" className="an-tech-link" onClick={e => { e.stopPropagation(); open(v); }}>{v}</button>}
+              {inactive.has(v) && <Tag style={{ marginLeft: 6 }}>Inactive</Tag>}
               {row.measured > 0 && row.measured < MIN_SAMPLE && <Tooltip title={`Only ${row.measured} measured - too few to rank`}><Tag style={{ marginLeft: 6 }}>few SRs</Tag></Tooltip>}
             </>
           ) } },
@@ -108,7 +116,7 @@ export default function Technicians() {
       { key: 'active', label: 'Active time (avg)', group: 'Handling', on: false, col: h('avg_active_minutes', 'Active time (avg)', 130, formatDuration) },
       { key: 'idle', label: `Idle ${stale}d+ (open)`, group: 'Handling', on: false, col: h('stale_7d', `Idle ${stale}d+ (open)`, 120, v => v ?? '-') },
     ];
-  }, [maxBar, hasDue, open, teamValue, MIN_SAMPLE, t1, t2, stale, A]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [maxBar, hasDue, open, teamValue, MIN_SAMPLE, t1, t2, stale, A, inactive]); // eslint-disable-line react-hooks/exhaustive-deps
   const defaults = useMemo(() => defs.filter(d => d.on).map(d => d.key), [defs]);
   const visible = chosen || defaults;
   const columns = useMemo(() => defs.filter(d => d.locked || visible.includes(d.key)).map(d => d.col), [defs, visible]);
@@ -141,14 +149,15 @@ export default function Technicians() {
   return (
     <>
       <p className="page-intro">Everyone who has been assigned SRs, side by side. Open any technician for their complete analysis: trends, workload, comparison with the team and every SR behind the numbers.</p>
-      <div className="filterbar">
+      <div className="filterbar tech-bar">
         <UserOutlined style={{ color: '#4f46e5' }} />
         <Select
           showSearch placeholder="Choose a technician to open their page..." style={{ width: 360, maxWidth: '100%' }} optionFilterProp="label" aria-label="Open a technician"
-          options={(meta?.facets?.technicians || []).filter(t => !t.unassigned).map(t => ({ value: t.name, label: t.name }))}
+          options={technicianOptions((meta?.facets?.technicians || []).filter(t => !t.unassigned))}
           onChange={open} value={null}
         />
         <span className="grow" />
+        {canManage && <Button icon={<TeamOutlined />} onClick={() => setManaging(true)}>Active / inactive{inactiveCount ? ` (${inactiveCount} inactive)` : ''}</Button>}
         <Button type="primary" icon={<FileExcelOutlined />} loading={exporting} disabled={!data} onClick={exportReport}>Excel report</Button>
       </div>
       <FilterBar showTechnicians={false} aggregation />
@@ -187,7 +196,7 @@ export default function Technicians() {
           </section>
         </div>
 
-        <ChartCard title="All technicians" subtitle={`${fmtInt(rows.length)}${query ? ` of ${fmtInt(allRows.length)}` : ''} people with SRs for these filters`} image={false} loading={pending} error={!data ? error : null} onRetry={reload}
+        <ChartCard title="All technicians" subtitle={`${fmtInt(rows.length)}${query ? ` of ${fmtInt(allRows.length)}` : ''} people with SRs for these filters${inactiveCount && techScope === 'active' ? ` · ${inactiveCount} inactive left out` : ''}`} image={false} loading={pending} error={!data ? error : null} onRetry={reload}
           filename="Technicians" data={tableData} hint="Click a column to sort. Click a row to open the technician. Use Columns to choose what is shown"
           extra={(
             <>
@@ -199,6 +208,7 @@ export default function Technicians() {
           <TechTable columns={columns} rows={rows} density={density} onOpen={open} compactScreen={!screens.md} />
         </ChartCard>
       </div>
+      {canManage && <TechnicianStatus open={managing} onClose={() => setManaging(false)} />}
     </>
   );
 }

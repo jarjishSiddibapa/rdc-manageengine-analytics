@@ -143,10 +143,10 @@ if (fs.existsSync(dist)) {
     const file = path.join(dist, 'index.html');
     const stat = fs.statSync(file);
     if (stat.mtimeMs !== indexCache.mtime) indexCache = { mtime: stat.mtimeMs, html: fs.readFileSync(file, 'utf8') };
-    const name = escapeHtml(settings.str('app_name') || 'ManageEngine Analytics');
+    const name = escapeHtml(settings.str('app_name') || 'RDC ManageEngine SR Analytics');
     return indexCache.html.replace(/<title>[^<]*<\/title>/, () => `<title>${name}</title>`)
-      .replace('Loading ManageEngine Analytics...', () => `Loading ${name}...`)
-      .replace('ManageEngine Analytics needs JavaScript', () => `${name} needs JavaScript`);
+      .replace('Loading RDC ManageEngine SR Analytics...', () => `Loading ${name}...`)
+      .replace('RDC ManageEngine SR Analytics needs JavaScript', () => `${name} needs JavaScript`);
   }
   app.use((req, res, next) => {
     if ((req.method !== 'GET' && req.method !== 'HEAD') || FILE_TYPES.test(req.path)) return next();
@@ -233,7 +233,7 @@ initDb({ recoverRuns: !NO_BACKGROUND })
     // Slow or stalled clients cannot hold connections open forever.
     server.requestTimeout = 120000;
     server.headersTimeout = 30000;
-    console.log(`ManageEngine Analytics running on http://localhost:${PORT}${NO_BACKGROUND ? ' (background sync disabled)' : ''}`);
+    console.log(`RDC ManageEngine SR Analytics running on http://localhost:${PORT}${NO_BACKGROUND ? ' (background sync disabled)' : ''}`);
     if (!NO_BACKGROUND) {
       sync.startScheduler();
       backup.init().catch(error => console.error('Backup schedule could not start:', error.message));
@@ -246,7 +246,7 @@ initDb({ recoverRuns: !NO_BACKGROUND })
     }, 60 * 60 * 1000).unref();
   })
   .catch(error => {
-    if (error.code === 'EADDRINUSE') console.error(`Port ${PORT} is already in use. Is ManageEngine Analytics already running? Close it, or change PORT in backend\\.env.`);
+    if (error.code === 'EADDRINUSE') console.error(`Port ${PORT} is already in use. Is RDC ManageEngine SR Analytics already running? Close it, or change PORT in backend\\.env.`);
     else if (error.code === 'EACCES') console.error(`Not allowed to listen on port ${PORT}. Try a different PORT in backend\\.env.`);
     else console.error('Could not start:', explainStartupFailure(error));
     process.exit(1);

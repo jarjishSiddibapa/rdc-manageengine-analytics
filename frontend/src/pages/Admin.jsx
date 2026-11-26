@@ -318,6 +318,7 @@ const ACTION_LABELS = {
   password_reset: 'Reset password', sessions_revoked: 'Signed user out', settings_updated: 'Changed settings', sync_started: 'Started sync', deep_sync_started: 'Started deep sync',
   history_started: 'Started SR history', history_rebuild_started: 'Rebuilt SR history', history_stopped: 'Stopped SR history',
   connections_updated: 'Changed connections', connection_tested: 'Tested a connection', sync_stopped: 'Stopped sync',
+  technicians_status_changed: 'Changed active technicians',
   password_reset_requested: 'Asked for a password reset link', password_reset_completed: 'Reset password with a link', password_reset_failed: 'Failed password reset link',
 };
 const ACTION_COLOR = { login_failed: 'red', user_deleted: 'red', user_disabled: 'orange', password_reset: 'gold', settings_updated: 'purple', connections_updated: 'purple', sync_started: 'blue', deep_sync_started: 'blue' };

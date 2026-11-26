@@ -1,4 +1,4 @@
-# ManageEngine Analytics
+# RDC ManageEngine SR Analytics
 
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-5FA04E?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)](https://expressjs.com/)
@@ -20,6 +20,8 @@ It keeps its own MySQL copy of the SR data so every screen is fast, and it **onl
 | **Team dashboard** | KPIs, SRs closed per month, turnaround by month, closed-within-1/3/7-day rates, open backlog and its age, with filters for period, technician, category, priority, group, request type and status. |
 | **Technicians** | Every technician side by side (closures, closure rate, average, median, 90th percentile, reassignment and reopen rates), a volume-against-speed chart, and a full profile page per person. |
 | **All SRs** | Every SR with raised, assigned and completed times and turnaround. Click one for details, handling figures and a complete event timeline. |
+| **Filters** | Technician, category, sub-category, region, site, priority, status, request type, group, department, mode and requester, shared by every analytics page and carried in the address. |
+| **Active technicians** | Mark who is active; figures, lists and Excel files can count only them. |
 | **Two ways to measure** | *Since assigned* (default) or *since raised*, and *average* or *median*, switchable at the top of every analytics page. |
 | **Downloads** | Every chart downloads as PNG, Excel or CSV of exactly the numbers drawn; dashboards, technician and SR lists have full server-built Excel reports. |
 | **Sync** | Quick sync (only changed SRs), deep sync (re-reads everything and flags SRs ManageEngine no longer has), and an automatic schedule with catch-up if the PC was off. |
@@ -62,7 +64,7 @@ Design choices worth knowing about:
 
 ## Quick start
 
-You need **Node.js 20 or newer** and a running **MySQL** server.
+You need **Node.js 22.12 or newer** (20.19+ also works) and a running **MySQL** server. Installing on another PC, with its data: **[docs/SETUP_NEW_PC.md](docs/SETUP_NEW_PC.md)**.
 
 ```bash
 cp backend/.env.example backend/.env      # then set the database and ManageEngine details
@@ -95,6 +97,7 @@ The seed script refuses to run unless the database name ends in `_demo`, so it c
 
 | Document | What is in it |
 |---|---|
+| [docs/SETUP_NEW_PC.md](docs/SETUP_NEW_PC.md) | Step by step: install on another PC, move the data, update later |
 | [docs/USER_GUIDE.md](docs/USER_GUIDE.md) | Day-to-day use: signing in, how turnaround is measured, syncing, SR history, downloads, backups, password reset, every `.env` setting |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Data flow, sync modes, history parsing, analytics engine, security model, frontend |
 | [docs/OPERATIONS.md](docs/OPERATIONS.md) | Running, syncing, backups and restore |

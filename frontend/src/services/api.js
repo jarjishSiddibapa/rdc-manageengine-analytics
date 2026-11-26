@@ -103,6 +103,12 @@ export const analyticsAPI = {
   request: id => request('GET', `/analytics/request/${encodeURIComponent(id)}`),
 };
 
+// Who counts as active. Changing it needs the manager or administrator role.
+export const technicianAPI = {
+  list: () => request('GET', '/technicians'),
+  setStatus: ({ active = [], inactive = [] }) => request('PUT', '/technicians/status', { body: { active, inactive } }),
+};
+
 export const syncAPI = {
   status: () => request('GET', '/sync/status'),
   run: mode => request('POST', `/sync/run?mode=${mode}`),

@@ -6,7 +6,7 @@ import { FONT, TEXT } from '../theme';
 
 const stamp = () => dayjs().format('YYYY-MM-DD');
 // The application name for the footer of downloaded pictures (set from the public settings).
-let brand = 'ManageEngine Analytics';
+let brand = 'RDC ManageEngine SR Analytics';
 export const setExportBrand = name => { if (name) brand = name; };
 
 const safeName = name => String(name || 'chart').replace(/[^A-Za-z0-9._-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 80) || 'chart';

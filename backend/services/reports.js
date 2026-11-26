@@ -4,7 +4,7 @@ const settings = require('./settings');
 
 // Names, prefixes and limits come from the settings (Admin -> Settings -> Identity / Reports). With the defaults the files are
 // exactly what they always were.
-const appName = () => settings.str('app_name') || 'ManageEngine Analytics';
+const appName = () => settings.str('app_name') || 'RDC ManageEngine SR Analytics';
 const titled = title => { const prefix = settings.str('report_title_prefix'); return prefix ? `${prefix} ${title}` : String(title); };
 const targetDays = () => analytics.cfg().targets;
 const staleDays = () => analytics.cfg().stale;
@@ -184,13 +184,10 @@ const basisLabel = basis => (basis === 'raised' ? 'Since the SR was raised' : 'S
 function describeFilters(filters) {
   const parts = [];
   if (filters.from || filters.to) parts.push(`Closed ${filters.from ? `from ${filters.from}` : ''}${filters.to ? ` to ${filters.to}` : ''}`.trim());
-  if (filters.technicians.length) parts.push(`Technician: ${filters.technicians.join(', ')}`);
-  if (filters.categories.length) parts.push(`Category: ${filters.categories.join(', ')}`);
-  if (filters.priorities.length) parts.push(`Priority: ${filters.priorities.join(', ')}`);
-  if (filters.groups.length) parts.push(`Group: ${filters.groups.join(', ')}`);
-  if (filters.requestTypes.length) parts.push(`Type: ${filters.requestTypes.join(', ')}`);
-  if (filters.statuses.length) parts.push(`Status: ${filters.statuses.join(', ')}`);
+  for (const f of analytics.LIST_FILTERS) if (filters[f.key].length) parts.push(`${f.label}: ${filters[f.key].join(', ')}`);
   if (filters.search) parts.push(`Search: ${filters.search}`);
+  const inactive = analytics.inactiveCount();
+  if (inactive && filters.techScope === 'active' && !filters.technicians.length) parts.push(`Active technicians only (${inactive} marked inactive left out)`);
   return parts.length ? parts.join(' | ') : 'None (all SRs, all time)';
 }
 
@@ -377,6 +374,8 @@ async function technicianReport(name, filters) {
     title: `Technician: ${data.technician.name}`,
     summary: summarySheet(`Technician: ${data.technician.name}`, tFilters, data.generated_at, [...summaryRows(s), ...handlingRows(data.handling.summary), ['SRs handed over to others', data.handovers.handed_away, 'int'], ['SRs received from others', data.handovers.received, 'int'], ...sr.limited], [
       ['Technician', data.technician.name, 'text'], ['Email', data.technician.email, 'text'],
+      ...(analytics.inactiveCount() ? [['Marked as', data.technician.active ? 'Active' : 'Inactive', 'text'],
+        ['Team compared against', filters.techScope === 'active' ? 'Active technicians (and this one)' : 'All technicians', 'text']] : []),
       ['Rank by SRs closed', data.ranks.closed ? `${data.ranks.closed.rank} of ${data.ranks.closed.of}` : 'Not ranked (too few SRs)', 'text'],
       ['Rank by average turnaround', data.ranks.avg ? `${data.ranks.avg.rank} of ${data.ranks.avg.of}` : 'Not ranked (too few SRs)', 'text'],
       ['Rank by median turnaround', data.ranks.median ? `${data.ranks.median.rank} of ${data.ranks.median.of}` : 'Not ranked (too few SRs)', 'text'],

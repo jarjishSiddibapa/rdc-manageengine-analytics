@@ -71,6 +71,15 @@ async function initDb({ recoverRuns = true } = {}) {
     ) ${tail}
   `);
 
+  // Technicians the team no longer counts as active (the app's own list; ManageEngine is never told). Anyone not listed is active.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS inactive_technicians (
+      name VARCHAR(255) NOT NULL PRIMARY KEY,
+      marked_by VARCHAR(255) NULL,
+      marked_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ${tail}
+  `);
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS sync_runs (
       id INT PRIMARY KEY AUTO_INCREMENT,

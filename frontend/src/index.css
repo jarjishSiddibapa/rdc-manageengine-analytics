@@ -4,7 +4,7 @@
   -webkit-font-smoothing: antialiased;
   color-scheme: light;
 
-  /* ManageEngine Analytics: ink-navy shell, indigo brand, quiet blue-grey surfaces. */
+  /* RDC ManageEngine SR Analytics: ink-navy shell, indigo brand, quiet blue-grey surfaces. */
   --ink: #0f1330;
   --ink-2: #181d45;
   --brand: #4f46e5;
@@ -298,7 +298,7 @@ a { color: var(--brand); }
 .empty-block .anticon { font-size: 28px; color: var(--text-3); }
 
 /* ── Filters on a phone ── */
-.filterbar.compact { flex-direction: column; align-items: stretch; gap: 10px; }
+.filterbar.compact { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 10px; }
 .filter-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .filter-basis { width: 100%; }
 .filter-sheet { display: grid; gap: 12px; }
@@ -330,3 +330,26 @@ a { color: var(--brand); }
   .login-form h1 { font-size: 24px; }
   .mobile-hide { display: none !important; }
 }
+
+/* Active / inactive technicians */
+.tech-status-intro { margin: 0 0 12px; color: var(--text-2); font-size: 13px; }
+.tech-status-tools { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; margin-bottom: 10px; }
+.tech-status-tools .ant-input-affix-wrapper { flex: 1 1 200px; max-width: 320px; }
+.tech-status-count { color: var(--text-3); font-size: 12px; }
+.tech-status-email { color: var(--text-3); font-size: 12px; overflow-wrap: anywhere; }
+.profile-active { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); }
+@media (max-width: 640px) {
+  .tech-bar > .anticon, .tech-bar .grow { display: none; }
+  .tech-bar > .ant-select { flex: 1 1 100%; }
+  .tech-bar > .ant-btn { flex: 1 1 auto; }
+}
+
+/* Filter bar: equal-width main filters, the rest under "More filters", chips for what is chosen there */
+.filter-main { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.filter-slot { display: flex; flex: 1 1 150px; min-width: 0; max-width: 340px; }
+.filter-select { width: 100%; }
+.filter-more { display: grid; gap: 10px; width: min(300px, 80vw); max-height: 60vh; overflow-y: auto; }
+.filter-field { display: grid; gap: 4px; min-width: 0; }
+.filter-field > span { font-size: 12px; color: var(--text-2); }
+.filter-chips { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px; }
+.filter-chips .ant-tag { margin: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }

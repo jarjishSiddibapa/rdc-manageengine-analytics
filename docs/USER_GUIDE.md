@@ -1,4 +1,4 @@
-# ManageEngine Analytics: user and operations guide
+# RDC ManageEngine SR Analytics: user and operations guide
 
 > Overview and screenshots are in the [README](../README.md). This guide covers day-to-day use.
 
@@ -6,9 +6,9 @@ A complete analytics application for ManageEngine ServiceDesk Plus Cloud: how lo
 
 ## Start it
 
-You need **Node.js 20 or newer** (<https://nodejs.org>) and a running **MySQL** server.
+You need **Node.js 22.12 or newer** (20.19+ also works; <https://nodejs.org>) and a running **MySQL** server. Moving to another PC: [SETUP_NEW_PC.md](SETUP_NEW_PC.md).
 
-Double-click **`startup.bat`**. It checks Node.js, `backend\.env`, that the port is free and that MySQL is reachable (and says plainly what to fix if not), installs packages and builds the screens on the first run (and again whenever the screen source is newer than the last build); after that it just starts.
+Double-click **`startup.bat`**. It checks Node.js, `backend\.env`, that the port is free and that MySQL is reachable (and says plainly what to fix if not), installs the libraries on the first run (and again after an update changed them) and builds the screens (again whenever their source is newer than the last build); after that it just starts. If `backend\.env` is missing it creates it from the example and opens it for you to fill in.
 Open <http://localhost:7780> and keep the window open while you use it. Close it, or press Ctrl+C, to stop (the app finishes what it is doing and shuts down cleanly).
 
 - Database: `manageengine_analytics` (MySQL; created automatically on first start).
@@ -38,6 +38,18 @@ Two switches sit at the top of the analytics pages. The first decides where the 
 - **Since raised**: from when the requester raised it until it was completed.
 
 Calendar time, weekends included. ManageEngine sets almost no due times on this portal, so due-time/overdue figures are hidden and "closed within 1 / 3 / 7 days" is used instead (they appear automatically if due times are ever populated).
+
+## Filters
+
+The analytics pages share one filter bar: period, **Technician**, **Category**, **Sub-category**, **Region**, **Site**, and under **More filters** priority, status, request type, group, department, mode and requester. Several values can be picked in each. Choosing a category narrows the sub-category list, and choosing a region narrows the site list. Filters travel in the address, so a view can be bookmarked or sent to a colleague, and Excel files name the filters used.
+
+**Region** comes from the site name (`Mumbai - Deonar` is in Mumbai). To merge spellings or build zones, edit **Admin > Settings > Analytics > Regions**, one line per region, for example `South: Bangalore, Chennai, Hyderabad`.
+
+## Active and inactive technicians
+
+Administrators and managers open **Technicians > Active / inactive** to switch people off (one at a time, or tick several and use *Mark inactive*), or use the **Active** switch on a technician's own page. Nothing is deleted and ManageEngine is not told.
+
+Once someone is inactive, an **Active only | All technicians** switch appears above the filters. *Active only* (the default, configurable) leaves their SRs out of dashboards, lists and Excel files; unassigned SRs stay. Picking a technician by name shows them either way. New technicians start as active.
 
 ## Syncing
 

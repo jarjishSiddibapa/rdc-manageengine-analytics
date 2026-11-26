@@ -1,0 +1,2 @@
+# Windows batch files need Windows line endings, however the project reaches a PC (clone or ZIP download).
+*.bat text eol=crlf
